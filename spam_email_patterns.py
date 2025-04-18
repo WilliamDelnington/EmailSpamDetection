@@ -1,14 +1,28 @@
 adult_content_patterns = [
-    r"(?i)\bdating\b",
-    r"(?i)\bone\snight\sstand\b",
-    r"(?i)\bsex\b"
+    r"(?i)\b(?:dating)\b",
+    r"(?i)\b(?:one\snight\sstand)\b",
+    r"(?i)\b(?:sex)\b",
     r"^(?=.*\bmature\b)(?=.*\bcontent\b).*$",
-    r"(?i)\bhorny\b"
-    r"(?i)\bhot(?:\s\w+)?\s(girls|girl|woman|women|ladies)\b",
+    r"(?i)\b(?:horny)\b",
+    r"(?i)\bhot(?:\s\w)+?\s(girls|girl|woman|women|ladies)\b",
+    r"(?i)\b(?:in\sbed)\b",
+    r"(?i)\b(?:penis|pussy|dick)\b",
+    r"(?i)\ber(?:\w)?ction(?:\w)?\b",
+    r"(?i)\b(?:tits)\b",
+    r"(?i)\b(?:boob|booby)\b",
+    r"(?i)\b(?:cum|orgasm|orgasms)\b",
+    r"(?i)\b(?:slutty|nude)\b",
+    r"(?i)\bdaddy\b",
+    r"(?i)\bsugar\s(mommy|baby)\b",
+    r"(?i)\b(?:porn)\b",
+    r"(?i)\b(?:sperm|sperms|sprms|sprm)\b",
+    r"(?i)\b(?:wives)\b",
+    r"(?i)\b(?:lonely\swomen|lonely\swoman)\b"
 ]
 
 lottery_scam_content_patterns = [
     r"(?i)\b(?:lottery|prize|winner|won)\b",
+    r"(?i)\b(?:congratulations|you\sare\sselected|you\sare\swinner)\b",
 ]
 
 financial_scam_content_patterns = [
@@ -23,7 +37,13 @@ financial_scam_content_patterns = [
     r"(?i)\b(?:click|visit|apply)\b",
     r"(?i)\b(?:free|complimentary|bonus)\b",
     r"(?i)\b(?:click\shere|act\snow|call\snow)\b",
-    r"(?i)\b(?:risk\sfree|no\sobligation|no\scost)\b",
+    r"(?i)\b(?:risk\sfree|no\sobligation|cheap|inexpensive|affordable)\b",
+    r"(?i)\b(?:loan|credit|debt)\b",
+    r"^(?=.*\b(low|no|less)\b)(?=.*\b(cost|costs|price|prices|priced)\b).*$",
+    r"(?i)\b(?:bank|account|financial)\b",
+    r"(?i)\b(?:money\sback|satisfaction\sguaranteed)\b",
+    r"(?i)\b(?:wealth|rich|prosperity)\b",
+    r"(?i)\b(?:house|car)\b"
 ]
 
 advetise_content_patterns = [
@@ -36,6 +56,18 @@ advetise_content_patterns = [
     r"(?i)\b(?:save\sup\sto|save\sbig)\b",
     r"(?i)\b(?:call\stoday|act\stoday)\b",
     r"(?i)\b(?:get\spaid|make\smoney)\b",
+    r"(?i)\b(?:guaranteed|approved|certified)\b",
+    r"(?i)\b(?:business|opportunity|work\from\shome)\b",
+    r"(?i)\b(?:earn\smoney|extra\scash)\b",
+    r"(?i)\b(?:financial\sfreedom|financial\sfuture)\b",
+    r"(?i)\b(?:services|products|solutions)\b",
+    r"(?i)\b(?:internet\smarketing|online\sbusiness)\b",
+    r"(?i)\b(?:company)\b",
+    r"(?i)\b\$\b",
+    r"(?i)\b(?:phone|mobile|call)\b",
+    r"(?i)\b(?:prom)\b",
+    r"(?i)\b(?:economical)\b",
+    r"(?i)\b(?:pill)\b"
 ]
 
 phishing_content_patterns = [
@@ -47,6 +79,7 @@ phishing_content_patterns = [
     r"(?i)\b(?:urgent|immediate\saction)\b",
     r"(?i)\b(?:suspended|deactivated|blocked)\b",
     r"(?i)\b(?:customer\sservice|support)\b",
+    r"(?i)\b(?:confirm)\b"
 ]
 
 malware_content_patterns = [
@@ -55,6 +88,8 @@ malware_content_patterns = [
     r"(?i)\b(?:urgent|important\supdate)\b",
     r"(?i)\b(?:open\sthis\sattachment)\b",
     r"(?i)\b(?:risk\sfree|no\scost)\b",
+    r"(?i)\b(?:software|softwares|program|application)\b",
+    r"(?i)\b(?:virus)\b"
 ]
 
 patterns = {
@@ -65,3 +100,14 @@ patterns = {
     "Phishing": phishing_content_patterns,
     "Malware": malware_content_patterns
 }
+
+url_patterns = r"""
+    (?ix)  # case-insensitive, verbose mode
+    \b
+    (https?)        # protocol (http or https)
+    \s*:\s*/\s*/    # ://
+    (?:[\w-]+\s*\.\s*)+[\w-]+     # domain (e.g., example . com)
+    (?:\s*/\s*[\w\-]+)*           # optional path segments
+    (?:\s*/\s*[\w\-]+\s*\.\s*\w+)? # optional file (e.g., .php, .html)
+    (?:\s*\?\s*[\w\-]+\s*=\s*[\w\-]+(?:\s+[\w\-]+)*)? # optional query
+"""

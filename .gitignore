@@ -4,3 +4,6 @@ test2.py
 TempData
 coyo-700m
 malicious-website-features-2.4M
+.env
+__pycache__
+other_spam_emails.csv
