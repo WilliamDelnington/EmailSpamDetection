@@ -101,13 +101,8 @@ patterns = {
     "Malware": malware_content_patterns
 }
 
-url_patterns = r"""
-    (?ix)  # case-insensitive, verbose mode
-    \b
-    (https?)        # protocol (http or https)
-    \s*:\s*/\s*/    # ://
-    (?:[\w-]+\s*\.\s*)+[\w-]+     # domain (e.g., example . com)
-    (?:\s*/\s*[\w\-]+)*           # optional path segments
-    (?:\s*/\s*[\w\-]+\s*\.\s*\w+)? # optional file (e.g., .php, .html)
-    (?:\s*\?\s*[\w\-]+\s*=\s*[\w\-]+(?:\s+[\w\-]+)*)? # optional query
-"""
+url_patterns = (
+    r"h\s*t\s*t\s*p\s*s?\s*:\s*\/\s*\/\s*" # http(s):// (protocol)
+    r"(?:(?:[a-zA-Z0-9\-]\s*)+\.\s*)+(?:[a-zA-Z0-9\-]\s*)+" # domain name
+    r"(?:\/\s*(?:[\w\.\-\/%=&\?]\s*)*)?" # path
+)

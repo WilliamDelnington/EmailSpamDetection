@@ -1,141 +1,86 @@
-import pandas as pd
-import os
 import nltk
 import re
-import csv
-from datasets import load_dataset
+import os
+from spam_email_patterns import url_patterns
+from ntlk.corpus import stopwords
+import emoji
+import pandas as pd
+nltk.download('punkt')
 
-# nltk.download('stopwords', download_dir="E:/nltk_data")
-# nltk.download('punkt', download_dir="E:/nltk_data")
+def load_emails(path, label_types=["ham", "spam"]):
+    """
+    Load emails from a directory and return a list of email contents.
+    """
+    # Check if the directory exists
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"The directory {path} does not exist.")
+    
+    # Specify the text and label arrays
+    all_texts = []
+    all_labels = []
 
-all_data = []
+    for label_type in label_types:
+        folder_path = os.path.join(path, label_type)
+        label = 0 if label_type == label_types[0] else 1
+        
+        for filename in os.listdir(folder_path):
+            with open(os.path.join(folder_path, filename), 'r', encoding='latin-1') as f:
+                try:
+                    all_texts.append(f.read())
+                    all_labels.append(label_type)
+                except Exception as e:
+                    print(f"Error reading {filename}: {e}")
 
-enron_df = pd.read_csv('./Datasets/enron.csv')
-# print("Enron Dataset:")
-# print(enron_df["label"].value_counts())
-# print(enron_df[enron_df["label"] == 1].head())
+    assert len(all_texts) == len(all_labels), "Mismatch between texts and labels."
+    return all_texts, all_labels
 
-# print("--------------------------------------------------")
+def load_email_from_csv(path, text_column='text', label_column='label'):
+    """
+    Load emails from a CSV file and return a list of email contents.
+    """
+    df = pd.read_csv(path, encoding='latin-1')
+    all_texts = df[text_column].tolist()
+    all_labels = df[label_column].tolist()
+    
+    assert len(all_texts) == len(all_labels), "Mismatch between texts and labels."
+    return all_texts, all_labels
 
-spam_df = pd.read_csv('./Datasets/spam.csv', encoding='latin-1')
-# print("Spam Dataset:")
-# print(spam_df["v1"].value_counts())
-# print(spam_df[spam_df["v1"] == "spam"].head())
+def extract_urls(text):
+    """
+    Extract URLs from the text using regex patterns.
+    """
+    urls = re.findall(url_patterns, text)
+    if urls:
+        for i in range(len(urls)):
+            urls[i] = re.sub(r'\s+', '', urls[i])
+    return urls
 
-# print("--------------------------------------------------")
+def preprocess_text(text):
+    """
+    Preprocess the text by removing URLs, HTML tags, and non-alphanumeric characters.
+    """
+    # Remove URLs
+    url = re.findall(url_patterns, text)
 
-spam_dataset_df = pd.read_csv('./Datasets/spam_dataset.csv', encoding='latin-1')
+    # Remove HTML tags
+    text = re.sub(r'<.*?>', '', text)
 
-ling_df = pd.read_csv('./Datasets/ling.csv')
-# print("Ling Dataset:")
-# print(ling_df["label"].value_counts())
-# print(ling_df[ling_df["label"] == 1].head())
+    # Remove non-alphanumeric characters and convert to lowercase
+    text = re.sub(r'[^a-zA-Z0-9\s]', '', text).lower()
 
-# print("--------------------------------------------------")
+    # Remove extra whitespace
+    text = re.sub(r'\s+', ' ', text).strip()
 
-messages_df = pd.read_csv('./Datasets/messages.csv')
-# print(messages_df.head())
+    # Tokenize the text
+    tokenized = nltk.word_tokenize(text)
 
-# print("--------------------------------------------------")
+    # Remove stopwords
+    stop_words = set(stopwords.words('english'))
 
-# nazario_df = pd.read_csv('./Datasets/nazario.csv')
-# print(nazario_df.head())
+    filtered = [word for word in tokenized if word not in stop_words]
+    
+    return filtered
 
-# print("--------------------------------------------------")
-
-spam_assassin_df = pd.read_csv('./Datasets/SpamAssasin.csv')
-# print("Spam Assassin Dataset:")
-# print(spam_assassin_df["label"].value_counts())
-# print(spam_assassin_df[spam_assassin_df["label"] == 1].head())
-
-# print("--------------------------------------------------")
-
-ceas_08_df = pd.read_csv('./Datasets/CEAS_08.csv')
-# print("CEAS 08 Dataset:")
-# print(ceas_08_df["label"].value_counts())
-# print(ceas_08_df[ceas_08_df["label"] == 1].head())
-
-phishing_df = pd.read_csv('./Datasets/Phishing_Email (2).csv')
-# print("Phishing Dataset:")
-# print(phishing_df["Email Type"].value_counts())
-# print(phishing_df[phishing_df["Email Type"] == "Phishing Email"].head())
-
-# print("--------------------------------------------------")
-
-nigerian_fraud_df = pd.read_csv('./Datasets/Nigerian_Fraud.csv')
-# print("Nigerian Fraud Dataset:")
-# print(nigerian_fraud_df["label"].value_counts())
-
-ham_folder_paths = [
-    "E:/Python Tests/AI/EmailSpamDetection/Datasets/enron1/ham",
-    "E:/Python Tests/AI/EmailSpamDetection/Datasets/enron2/ham",
-    "E:/Python Tests/AI/EmailSpamDetection/Datasets/enron3/ham",
-    "E:/Python Tests/AI/EmailSpamDetection/Datasets/enron4/ham",
-    "E:/Python Tests/AI/EmailSpamDetection/Datasets/enron5/ham",
-    "E:/Python Tests/AI/EmailSpamDetection/Datasets/enron6/ham"
-]
-
-spam_folder_paths = [
-    "E:/Python Tests/AI/EmailSpamDetection/Datasets/enron1/spam",
-    "E:/Python Tests/AI/EmailSpamDetection/Datasets/enron2/spam",
-    "E:/Python Tests/AI/EmailSpamDetection/Datasets/enron3/spam",
-    "E:/Python Tests/AI/EmailSpamDetection/Datasets/enron4/spam",
-    "E:/Python Tests/AI/EmailSpamDetection/Datasets/enron5/spam",
-    "E:/Python Tests/AI/EmailSpamDetection/Datasets/enron6/spam"
-]
-
-# for ham_folder_path in ham_folder_paths:
-#     for filename in os.listdir(ham_folder_path):
-#         with open(os.path.join(ham_folder_path, filename), 'r', encoding='latin-1') as file:
-#             content = file.read()
-#             subject_match = re.search(r"Subject: (.*?)(?:\n|$)", content)
-#             subject = subject_match.group(1) if subject_match else ""
-#             all_data.append({"file_name": filename, "subject": subject, "text": content, "label": 0})  # 0 for ham
-
-# for spam_folder_path in spam_folder_paths:
-#     for filename in os.listdir(spam_folder_path):
-#         with open(os.path.join(spam_folder_path, filename), 'r', encoding='latin-1') as file:
-#             content = file.read()
-#             subject_match = re.search(r"Subject: (.*?)(?:\n|$)", content)
-#             subject = subject_match.group(1) if subject_match else ""
-#             all_data.append({"file_name": filename, "subject": subject, "text": content, "label": 1})  # 1 for spam
-
-# data = pd.DataFrame(all_data)
-# data.to_csv('./Datasets/enron_combined.csv', index=False, encoding='utf-8', quoting=csv.QUOTE_ALL, escapechar="\\")
-
-# enron_combined_df = pd.read_csv('./Datasets/enron_combined.csv')
-# print(enron_combined_df.head())
-
-# combined_data_df = pd.read_csv('./Datasets/combined_data.csv')
-# print(combined_data_df.head())
-
-# ds = load_dataset("yxzwayne/email-spam-10k")
-
-# labels = ds["train"]["is_spam"]
-# text = ds["train"]["text"]
-
-# email_spam_10k_df = pd.DataFrame({"text": text, "label": labels})
-# email_spam_10k_df.to_csv("./datasets/email_spam_10k.csv", index=False, encoding='utf-8', quoting=csv.QUOTE_ALL, escapechar="\\")
-# print("Transfer complete")
-
-# Example mappings
-def extract_spam(df, spam_values, label_column='label'):
-    return df[df[label_column].isin(spam_values)].copy()
-
-enron_spam_df = extract_spam(enron_df, [1])
-spam_spam_df = extract_spam(spam_df, ["spam"], label_column='Category')
-spam_spam_2_df = extract_spam(spam_dataset_df, [1], label_column='is_spam')
-# print(enron_spam_df)
-
-def standardize(df, text_col='text', label_col='label', subject_col="subject"):
-    if df.get(subject_col) is None:
-        df["subject"] = ""
-    return df.rename(columns={text_col: 'text', label_col: 'label', subject_col: 'subject'})[['text', 'label', "subject"]]
-
-enron_spam_df = standardize(enron_spam_df, text_col='body')
-spam_spam_df = standardize(spam_spam_df, text_col='Message', label_col='Category')
-spam_spam_2_df = standardize(spam_spam_2_df, text_col='message_content', label_col='is_spam')
-
-merge = pd.concat([enron_spam_df, spam_spam_df, spam_spam_2_df], ignore_index=True)
-# print(enron_spam_df)
-print(merge)
+def remove_emojis(text):
+    emoji_corpus = [emoji.demojize(c) for c in text]
+    return emoji_corpus

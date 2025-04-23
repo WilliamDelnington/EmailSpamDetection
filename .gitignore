@@ -7,3 +7,13 @@ malicious-website-features-2.4M
 .env
 __pycache__
 other_spam_emails.csv
+.qodo
+EnronDatasetTests/enron1
+EnronDatasetTests/enron2
+EnronDatasetTests/enron3
+EnronDatasetTests/enron4
+EnronDatasetTests/enron5
+EnronDatasetTests/enron6
+SpamAssassinDatasetTests/easy_ham
+SpamAssassinDatasetTests/hard_ham
+SpamAssassinDatasetTests/spam_2
