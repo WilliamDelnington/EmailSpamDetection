@@ -1,7 +1,7 @@
 import nltk
 import re
 import os
-from Handlers.spam_email_patterns import url_patterns
+from spam_email_patterns import url_patterns
 from nltk.corpus import stopwords
 import emoji
 import pandas as pd
@@ -55,7 +55,7 @@ def extract_urls(text):
             urls[i] = re.sub(r'\s+', '', urls[i])
     return urls
 
-def preprocess_text(text):
+def preprocess_text(text, remove_numbers=False, unncessary_words=None):
     """
     Preprocess the text by removing URLs, HTML tags, and non-alphanumeric characters.
     """
@@ -67,6 +67,15 @@ def preprocess_text(text):
 
     # Remove non-alphanumeric characters and convert to lowercase
     text = re.sub(r'[^a-zA-Z0-9\s]', '', text).lower()
+
+    if remove_numbers:
+        # Remove numbers
+        text = re.sub(r'\d+', '', text)
+
+    if unncessary_words:
+        # Remove unnecessary words
+        for word in unncessary_words:
+            text = re.sub(r'(?i)\b' + re.escape(word) + r'\b', '', text)
 
     # Remove extra whitespace
     text = re.sub(r'\s+', ' ', text).strip()
