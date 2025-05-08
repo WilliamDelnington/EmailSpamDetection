@@ -3,8 +3,12 @@ import re
 import os
 from spam_email_patterns import url_patterns
 from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer, PorterStemmer
 import emoji
 import pandas as pd
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 nltk.download('punkt')
 
 def load_emails(path, label_types=["ham", "spam"]):
@@ -80,6 +84,8 @@ def preprocess_text(text, remove_numbers=False, unncessary_words=None):
     # Remove extra whitespace
     text = re.sub(r'\s+', ' ', text).strip()
 
+    text = re.sub(r'\n', " ", text)
+
     # Tokenize the text
     tokenized = nltk.word_tokenize(text)
 
@@ -93,3 +99,34 @@ def preprocess_text(text, remove_numbers=False, unncessary_words=None):
 def remove_emojis(text):
     emoji_corpus = [emoji.demojize(c) for c in text]
     return emoji_corpus
+
+def visualize_wordcloud(text, title='Word Cloud'):
+    """
+    Visualize the word cloud of the text.
+    """
+    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(' '.join(text))
+    
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis('off')
+    plt.title(title)
+    plt.show()
+
+def preprocess_and_vectorizing(
+        text: list,
+        lem_or_stem_method: WordNetLemmatizer | PorterStemmer, 
+        vectorizer: CountVectorizer | TfidfVectorizer):
+
+    if isinstance(lem_or_stem_method, WordNetLemmatizer):
+        processed_text = " ".join([lem_or_stem_method.lemmatize(t) for t in text])
+    elif isinstance(lem_or_stem_method, PorterStemmer):
+        processed_text = " ".join([lem_or_stem_method.stem(t) for t in text])
+    else:
+        raise TypeError("Not a stemming or lemmatizing class")
+    
+    if not isinstance(vectorizer, (CountVectorizer | TfidfVectorizer)):
+        raise TypeError("Object not a vectorizer")
+    
+    X = vectorizer.fit_transform(preprocess_text)
+
+    return X

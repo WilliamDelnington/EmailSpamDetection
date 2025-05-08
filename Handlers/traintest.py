@@ -8,373 +8,10 @@ from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.base import BaseEstimator
 import torch.nn as nn
 import torch
 import matplotlib.pyplot as plt
-
-class SupportVectorMachine:
-    def __init__(self, X, y, test_size=0.2, random_state=42):
-        self.X = X
-        self.y = y
-        self.test_size = test_size
-        self.random_state = random_state
-        self.model = None
-        self.X_train = None
-        self.X_test = None
-        self.y_train = None
-        self.y_test = None
-
-    def train(self):
-        # Split the dataset into training and testing sets
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-            self.X, self.y, test_size=self.test_size, random_state=self.random_state)
-
-        # Create a Support Vector Machine classifier
-        self.model = svm.SVC(kernel='linear')
-
-        # Train the model on the training data
-        self.model.fit(self.X_train, self.y_train)
-
-    def evaluate(self):
-        # Check if the model has been trained
-        if (self.X_train is None or
-            self.X_test is None or
-            self.y_train is None or
-            self.y_test is None):
-            raise ValueError("Model has not been trained yet. Call train() before evaluate().")
-        
-        # Make predictions on the test data
-        y_pred = self.model.predict(self.X_test)
-
-        # Print classification report and confusion matrix
-        print(classification_report(self.y_test, y_pred))
-        
-        self.confusion_matrix = confusion_matrix(self.y_test, y_pred)
-
-    def visualize_confusion_matrix(self):
-        # Check if the confusion matrix has been computed
-        if self.confusion_matrix is None:
-            raise ValueError("Confusion matrix has not been computed. Call evaluate() before visualize_confusion_matrix().")
-        
-        # Create a ConfusionMatrixDisplay object
-        disp = ConfusionMatrixDisplay(confusion_matrix=self.confusion_matrix, display_labels=self.model.classes_)
-
-        # Plot the confusion matrix
-        disp.plot(cmap=plt.cm.Blues)
-        plt.title("Confusion Matrix")
-        plt.show()
-
-class GaussianNaiveBayes:
-    def __init__(self, X, y, test_size=0.2, random_state=42):
-        self.X = X
-        self.y = y
-        self.test_size = test_size
-        self.random_state = random_state
-        self.model = None
-        self.X_train = None
-        self.X_test = None
-        self.y_train = None
-        self.y_test = None
-
-    def train(self):
-        # Split the dataset into training and testing sets
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-            self.X, self.y, test_size=self.test_size, random_state=self.random_state)
-        
-        # Create a Naive Bayes classifier
-        self.model = GaussianNB()
-
-        # Train the model on the training data
-        self.model.fit(self.X_train, self.y_train)
-
-    def evaluate(self):
-        # Check if the model has been trained
-        if (self.X_train is None or
-            self.X_test is None or
-            self.y_train is None or
-            self.y_test is None):
-            raise ValueError("Model has not been trained yet. Call train() before evaluate().")
-        
-        # Make predictions on the test data
-        y_pred = self.model.predict(self.X_test)
-
-        # Print classification report and confusion matrix
-        print(classification_report(self.y_test, y_pred))
-
-        self.confusion_matrix = confusion_matrix(self.y_test, y_pred)
-
-    def visualize_confusion_matrix(self):
-        # Check if the confusion matrix has been computed
-        if self.confusion_matrix is None:
-            raise ValueError("Confusion matrix has not been computed. Call evaluate() before visualize_confusion_matrix().")
-        
-        # Create a ConfusionMatrixDisplay object
-        disp = ConfusionMatrixDisplay(confusion_matrix=self.confusion_matrix, display_labels=self.model.classes_)
-
-        # Plot the confusion matrix
-        disp.plot(cmap=plt.cm.Blues)
-        plt.title("Confusion Matrix")
-        plt.show()
-
-class MultinomialNaiveBayes:
-    def __init__(self, X, y, test_size=0.2, random_state=42):
-        self.X = X
-        self.y = y
-        self.test_size = test_size
-        self.random_state = random_state
-        self.model = None
-        self.X_train = None
-        self.X_test = None
-        self.y_train = None
-        self.y_test = None
-
-    def train(self):
-        # Split the dataset into training and testing sets
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-            self.X, self.y, test_size=self.test_size, random_state=self.random_state)
-
-        # Create a Multinomial Naive Bayes classifier
-        self.model = MultinomialNB()
-
-        # Train the model on the training data
-        self.model.fit(self.X_train, self.y_train)
-
-    def evaluate(self):
-        # Check if the model has been trained
-        if (self.X_train is None or
-            self.X_test is None or
-            self.y_train is None or
-            self.y_test is None):
-            raise ValueError("Model has not been trained yet. Call train() before evaluate().")
-
-        # Make predictions on the test data
-        y_pred = self.model.predict(self.X_test)
-
-        # Print classification report and confusion matrix
-        print(classification_report(self.y_test, y_pred))
-        
-        self.confusion_matrix = confusion_matrix(self.y_test, y_pred)
-
-    def visualize_confusion_matrix(self):
-        # Check if the confusion matrix has been computed
-        if self.confusion_matrix is None:
-            raise ValueError("Confusion matrix has not been computed. Call evaluate() before visualize_confusion_matrix().")
-        
-        # Create a ConfusionMatrixDisplay object
-        disp = ConfusionMatrixDisplay(confusion_matrix=self.confusion_matrix, display_labels=self.model.classes_)
-
-        # Plot the confusion matrix
-        disp.plot(cmap=plt.cm.Blues)
-        plt.title("Confusion Matrix")
-        plt.show()
-
-class BernoulliNaiveBayes:
-    def __init__(self, X, y, test_size=0.2, random_state=42):
-        self.X = X
-        self.y = y
-        self.test_size = test_size
-        self.random_state = random_state
-        self.model = None
-        self.X_train = None
-        self.X_test = None
-        self.y_train = None
-        self.y_test = None
-
-    def train(self):
-        # Split the dataset into training and testing sets
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-            self.X, self.y, test_size=self.test_size, random_state=self.random_state)
-
-        # Create a Bernoulli Naive Bayes classifier
-        self.model = BernoulliNB()
-
-        # Train the model on the training data
-        self.model.fit(self.X_train, self.y_train)
-
-    def evaluate(self):
-        # Check if the model has been trained
-        if (self.X_train is None or
-            self.X_test is None or
-            self.y_train is None or
-            self.y_test is None):
-            raise ValueError("Model has not been trained yet. Call train() before evaluate().")
-
-        # Make predictions on the test data
-        y_pred = self.model.predict(self.X_test)
-
-        # Print classification report and confusion matrix
-        print(classification_report(self.y_test, y_pred))
-        
-        self.confusion_matrix = confusion_matrix(self.y_test, y_pred)
-
-    def visualize_confusion_matrix(self):
-        # Check if the confusion matrix has been computed
-        if self.confusion_matrix is None:
-            raise ValueError("Confusion matrix has not been computed. Call evaluate() before visualize_confusion_matrix().")
-        
-        # Create a ConfusionMatrixDisplay object
-        disp = ConfusionMatrixDisplay(confusion_matrix=self.confusion_matrix, display_labels=self.model.classes_)
-
-        # Plot the confusion matrix
-        disp.plot(cmap=plt.cm.Blues)
-        plt.title("Confusion Matrix")
-        plt.show()
-
-class RandomForest:
-    def __init__(self, X, y, test_size=0.2, random_state=42):
-        self.X = X
-        self.y = y
-        self.test_size = test_size
-        self.random_state = random_state
-        self.model = None
-        self.X_train = None
-        self.X_test = None
-        self.y_train = None
-        self.y_test = None
-
-    def train(self):
-        # Split the dataset into training and testing sets
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-            self.X, self.y, test_size=self.test_size, random_state=self.random_state)
-
-        # Create a Random Forest classifier
-        self.model = RandomForestClassifier(n_estimators=100)
-
-        # Train the model on the training data
-        self.model.fit(self.X_train, self.y_train)
-
-    def evaluate(self):
-        # Check if the model has been trained
-        if (self.X_train is None or
-            self.X_test is None or
-            self.y_train is None or
-            self.y_test is None):
-            raise ValueError("Model has not been trained yet. Call train() before evaluate().")
-
-        # Make predictions on the test data
-        y_pred = self.model.predict(self.X_test)
-
-        # Print classification report and confusion matrix
-        print(classification_report(self.y_test, y_pred))
-        
-        self.confusion_matrix = confusion_matrix(self.y_test, y_pred)
-
-    def visualize_confusion_matrix(self):
-        # Check if the confusion matrix has been computed
-        if self.confusion_matrix is None:
-            raise ValueError("Confusion matrix has not been computed. Call evaluate() before visualize_confusion_matrix().")
-        
-        # Create a ConfusionMatrixDisplay object
-        disp = ConfusionMatrixDisplay(confusion_matrix=self.confusion_matrix, display_labels=self.model.classes_)
-
-        # Plot the confusion matrix
-        disp.plot(cmap=plt.cm.Blues)
-        plt.title("Confusion Matrix")
-        plt.show()
-
-class DecisionTree:
-    def __init__(self, X, y, test_size=0.2, random_state=42):
-        self.X = X
-        self.y = y
-        self.test_size = test_size
-        self.random_state = random_state
-        self.model = None
-        self.X_train = None
-        self.X_test = None
-        self.y_train = None
-        self.y_test = None
-
-    def train(self):
-        # Split the dataset into training and testing sets
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-            self.X, self.y, test_size=self.test_size, random_state=self.random_state)
-
-        # Create a Decision Tree classifier
-        self.model = DecisionTreeClassifier()
-
-        # Train the model on the training data
-        self.model.fit(self.X_train, self.y_train)
-
-    def evaluate(self):
-        # Check if the model has been trained
-        if (self.X_train is None or
-            self.X_test is None or
-            self.y_train is None or
-            self.y_test is None):
-            raise ValueError("Model has not been trained yet. Call train() before evaluate().")
-
-        # Make predictions on the test data
-        y_pred = self.model.predict(self.X_test)
-
-        # Print classification report and confusion matrix
-        print(classification_report(self.y_test, y_pred))
-        
-        self.confusion_matrix = confusion_matrix(self.y_test, y_pred)
-
-    def visualize_confusion_matrix(self):
-        # Check if the confusion matrix has been computed
-        if self.confusion_matrix is None:
-            raise ValueError("Confusion matrix has not been computed. Call evaluate() before visualize_confusion_matrix().")
-        
-        # Create a ConfusionMatrixDisplay object
-        disp = ConfusionMatrixDisplay(confusion_matrix=self.confusion_matrix, display_labels=self.model.classes_)
-
-        # Plot the confusion matrix
-        disp.plot(cmap=plt.cm.Blues)
-        plt.title("Confusion Matrix")
-        plt.show()
-
-class KNearestNeighbors:
-    def __init__(self, X, y, test_size=0.2, random_state=42):
-        self.X = X
-        self.y = y
-        self.test_size = test_size
-        self.random_state = random_state
-        self.model = None
-        self.X_train = None
-        self.X_test = None
-        self.y_train = None
-        self.y_test = None
-
-    def train(self):
-        # Split the dataset into training and testing sets
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-            self.X, self.y, test_size=self.test_size, random_state=self.random_state)
-
-        # Create a K-Nearest Neighbors classifier
-        self.model = KNeighborsClassifier(n_neighbors=5)
-
-        # Train the model on the training data
-        self.model.fit(self.X_train, self.y_train)
-
-    def evaluate(self):
-        # Check if the model has been trained
-        if (self.X_train is None or
-            self.X_test is None or
-            self.y_train is None or
-            self.y_test is None):
-            raise ValueError("Model has not been trained yet. Call train() before evaluate().")
-
-        # Make predictions on the test data
-        y_pred = self.model.predict(self.X_test)
-
-        # Print classification report and confusion matrix
-        print(classification_report(self.y_test, y_pred))
-
-        self.confusion_matrix = confusion_matrix(self.y_test, y_pred)
-
-    def visualize_confusion_matrix(self):
-        # Check if the confusion matrix has been computed
-        if self.confusion_matrix is None:
-            raise ValueError("Confusion matrix has not been computed. Call evaluate() before visualize_confusion_matrix().")
-        
-        # Create a ConfusionMatrixDisplay object
-        disp = ConfusionMatrixDisplay(confusion_matrix=self.confusion_matrix, display_labels=self.model.classes_)
-
-        # Plot the confusion matrix
-        disp.plot(cmap=plt.cm.Blues)
-        plt.title("Confusion Matrix")
-        plt.show()
 
 class RecurrentNN(nn.Module):
     def __init__(self, vocab_size, embedding_size, hidden_size, output_size):
@@ -389,57 +26,6 @@ class RecurrentNN(nn.Module):
         out = self.fc(out[:, -1, :])
         return out
     
-class LogisticRegressionModel:
-    def __init__(self, X, y, test_size=0.2, random_state=42):
-        self.X = X
-        self.y = y
-        self.test_size = test_size
-        self.random_state = random_state
-        self.model = None
-        self.X_train = None
-        self.X_test = None
-        self.y_train = None
-        self.y_test = None
-
-    def train(self):
-        # Split the dataset into training and testing sets
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-            self.X, self.y, test_size=self.test_size, random_state=self.random_state)
-
-        # Create a Logistic Regression classifier
-        self.model = LogisticRegression()
-
-        # Train the model on the training data
-        self.model.fit(self.X_train, self.y_train)
-
-    def evaluate(self):
-        # Check if the model has been trained
-        if (self.X_train is None or
-            self.X_test is None or
-            self.y_train is None or
-            self.y_test is None):
-            raise ValueError("Model has not been trained yet. Call train() before evaluate().")
-
-        # Make predictions on the test data
-        y_pred = self.model.predict(self.X_test)
-
-        # Print classification report and confusion matrix
-        print(classification_report(self.y_test, y_pred))
-        
-        self.confusion_matrix = confusion_matrix(self.y_test, y_pred)
-
-    def visualize_confusion_matrix(self):
-        # Check if the confusion matrix has been computed
-        if self.confusion_matrix is None:
-            raise ValueError("Confusion matrix has not been computed. Call evaluate() before visualize_confusion_matrix().")
-        
-        # Create a ConfusionMatrixDisplay object
-        disp = ConfusionMatrixDisplay(confusion_matrix=self.confusion_matrix, display_labels=self.model.classes_)
-
-        # Plot the confusion matrix
-        disp.plot(cmap=plt.cm.Blues)
-        plt.title("Confusion Matrix")
-        plt.show()
 
 class LongShortTermMemory(nn.Module):
     def __init__(self, vocab_size, embedding_size, hidden_size, output_size, n_layers, dropout):
@@ -457,55 +43,97 @@ class LongShortTermMemory(nn.Module):
         hidden = torch.cat((hidden[-2,:,:], hidden[-1,:,:]), dim=1)
         hidden = self.dropout(hidden)
         return self.fc(hidden)
-    
-class AdaBoost:
-    def __init__(self, X, y, test_size=0.2, random_state=42):
+
+models = [
+    svm.SVC(kernel="linear"),
+    svm.SVC(kernel="rbf"),
+    GaussianNB(),
+    MultinomialNB(),
+    BernoulliNB(),
+    RandomForestClassifier(),
+    DecisionTreeClassifier(),
+    AdaBoostClassifier(),
+    LogisticRegression(),
+    KNeighborsClassifier()
+]
+
+class EvaluateError(Exception):
+    def __init__(self, *args):
+        super(Exception, self).__init__(*args)
+
+class ClassificationModel:
+    def __init__(self, model, X, y, test_size=0.2, random_state=42):
+        """
+        Initialize the classifier with a sklearn model
+
+        Parameters:
+        - model: The model to be used for training
+        - X: The sample of data
+        - y: The label of data
+        - test_size: The test size ratio to split into the training and testing sets.
+        - random_state: Set the random state when splitting training and testing model.
+        """
+        if not isinstance(model, BaseEstimator):
+            raise TypeError("Classification model must be built from sklearn")
+        self.model = model
+
+        match self.model:
+            case isinstance(self.model, svm.SVC):
+                self.name = "SVM"
+            case isinstance(self.model, GaussianNB):
+                self.name = "Gaussian Naive Bayes"
+            case isinstance(self.model, MultinomialNB):
+                self.name = "Multinomial Naive Bayes"
+            case isinstance(self.model, BernoulliNB):
+                self.name = "Bernoulli Naive Bayes"
+            case isinstance(self.model, RandomForestClassifier):
+                self.name = "Random Forest"
+            case isinstance(self.model, DecisionTreeClassifier):
+                self.name = "Decision Tree"
+            case isinstance(self.model, LogisticRegression):
+                self.name = "Logistic Regression"
+            case isinstance(self.model, KNeighborsClassifier):
+                self.name = "K-nearest Neighbors"
+            case isinstance(self.model, AdaBoostClassifier):
+                self.name = "AdaBoost"
+            case _:
+                self.name = ""
+
         self.X = X
         self.y = y
         self.test_size = test_size
         self.random_state = random_state
-        self.model = None
         self.X_train = None
-        self.X_test = None
         self.y_train = None
+        self.X_test = None
         self.y_test = None
 
     def train(self):
-        # Split the dataset into training and testing sets
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-            self.X, self.y, test_size=self.test_size, random_state=self.random_state)
+        self.X_train, self.y_train, self.X_test, self.y_test = train_test_split(
+            self.X, self.y, test_size=self.test_size, random_state=self.random_state
+        )
 
-        # Create an AdaBoost classifier
-        self.model = AdaBoostClassifier(n_estimators=100)
-
-        # Train the model on the training data
         self.model.fit(self.X_train, self.y_train)
 
     def evaluate(self):
-        # Check if the model has been trained
         if (self.X_train is None or
+            self.y_train is None or 
             self.X_test is None or
-            self.y_train is None or
             self.y_test is None):
-            raise ValueError("Model has not been trained yet. Call train() before evaluate().")
-
-        # Make predictions on the test data
+            raise EvaluateError("The model hasn't been trained yet.")
+        
         y_pred = self.model.predict(self.X_test)
 
-        # Print classification report and confusion matrix
-        print(classification_report(self.y_test, y_pred))
-        
         self.confusion_matrix = confusion_matrix(self.y_test, y_pred)
 
-    def visualize_confusion_matrix(self):
-        # Check if the confusion matrix has been computed
-        if self.confusion_matrix is None:
-            raise ValueError("Confusion matrix has not been computed. Call evaluate() before visualize_confusion_matrix().")
+        return classification_report(self.y_test, y_pred)
+    
+    def draw_confusion_matrix(self):
+        if not hasattr(self, "confusion_matrix"):
+            raise ValueError("Model is not evaluated.")
         
-        # Create a ConfusionMatrixDisplay object
-        disp = ConfusionMatrixDisplay(confusion_matrix=self.confusion_matrix, display_labels=self.model.classes_)
+        disp = ConfusionMatrixDisplay(self.confusion_matrix, display_labels=self.model.classes__)
 
-        # Plot the confusion matrix
         disp.plot(cmap=plt.cm.Blues)
-        plt.title("Confusion Matrix")
+        plt.title(f"{self.name} Confusion Matrix")
         plt.show()
