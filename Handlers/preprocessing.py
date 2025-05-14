@@ -1,7 +1,7 @@
 import nltk
 import re
 import os
-from spam_email_patterns import url_patterns
+from spam_email_patterns import *
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer, PorterStemmer
 import emoji
@@ -10,6 +10,7 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 nltk.download('punkt')
+from typing import List
 
 def load_emails(path, label_types=["ham", "spam"]):
     """
@@ -63,28 +64,46 @@ def preprocess_text(text, remove_numbers=False, unncessary_words=None):
     """
     Preprocess the text by removing URLs, HTML tags, and non-alphanumeric characters.
     """
+    text = str(text).lower()
+
+    # Remove email
+    text = re.sub(email_pattern, "EMAIL", str(text))
+
+    text = re.sub(spaced_out_email_pattern, "EMAIL", str(text))
+
     # Remove URLs
-    url = re.findall(url_patterns, text)
+    text = re.sub(url_patterns, "URL", str(text))
 
-    # Remove HTML tags
-    text = re.sub(r'<.*?>', '', text)
+    # Remove phone number
+    text = re.sub(phone_number_pattern, "PHONENUM", str(text))
 
-    # Remove non-alphanumeric characters and convert to lowercase
-    text = re.sub(r'[^a-zA-Z0-9\s]', '', text).lower()
+    # Remove time
+    text = re.sub(time_pattern, "TIME", str(text))
+
+    # Remove date
+    text = re.sub(date_patterns, "DATE", str(text))
+
+    # Remove cost value
+    text = re.sub(money_pattern, "VALUE", str(text))
+
+    # Remove non-alphanumeric characters
+    text = re.sub(r'[^a-zA-Z0-9\s]', '', str(text))
+
+    text = re.sub("phonenum", "phone_number", str(text))
 
     if remove_numbers:
         # Remove numbers
-        text = re.sub(r'\d+', '', text)
+        text = re.sub(r'\d+', '', str(text))
 
     if unncessary_words:
         # Remove unnecessary words
         for word in unncessary_words:
-            text = re.sub(r'(?i)\b' + re.escape(word) + r'\b', '', text)
+            text = re.sub(r'(?i)\b' + re.escape(word) + r'\b', '', str(text))
 
     # Remove extra whitespace
-    text = re.sub(r'\s+', ' ', text).strip()
+    text = re.sub(r'\s+', ' ', str(text)).strip()
 
-    text = re.sub(r'\n', " ", text)
+    text = re.sub(r'\n', " ", str(text))
 
     # Tokenize the text
     tokenized = nltk.word_tokenize(text)
@@ -100,7 +119,7 @@ def remove_emojis(text):
     emoji_corpus = [emoji.demojize(c) for c in text]
     return emoji_corpus
 
-def visualize_wordcloud(text, title='Word Cloud'):
+def visualize_wordcloud(text: list, title='Word Cloud'):
     """
     Visualize the word cloud of the text.
     """
@@ -112,21 +131,18 @@ def visualize_wordcloud(text, title='Word Cloud'):
     plt.title(title)
     plt.show()
 
-def preprocess_and_vectorizing(
-        text: list,
-        lem_or_stem_method: WordNetLemmatizer | PorterStemmer, 
-        vectorizer: CountVectorizer | TfidfVectorizer):
+def lemmatizing(text: list):
+    lemmatizer = WordNetLemmatizer()
+    processed_text = " ".join([lemmatizer.lemmatize(t) for t in text])
+    return processed_text
 
-    if isinstance(lem_or_stem_method, WordNetLemmatizer):
-        processed_text = " ".join([lem_or_stem_method.lemmatize(t) for t in text])
-    elif isinstance(lem_or_stem_method, PorterStemmer):
-        processed_text = " ".join([lem_or_stem_method.stem(t) for t in text])
-    else:
-        raise TypeError("Not a stemming or lemmatizing class")
-    
-    if not isinstance(vectorizer, (CountVectorizer | TfidfVectorizer)):
-        raise TypeError("Object not a vectorizer")
-    
-    X = vectorizer.fit_transform(preprocess_text)
+def stemming(text: list):
+    stemmer = PorterStemmer()
+    processed_text = " ".join([stemmer.stem(t) for t in text])
+    return processed_text
 
+def vectorizing(text: List[str], vectorizer: CountVectorizer | TfidfVectorizer):
+    if not isinstance(vectorizer, (CountVectorizer, TfidfVectorizer)):
+        raise TypeError("Argument should be declared from CountVectorizer or TfidfVectorizer")
+    X = vectorizer.fit_transform(text)
     return X

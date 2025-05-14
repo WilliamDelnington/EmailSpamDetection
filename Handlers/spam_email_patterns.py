@@ -102,20 +102,41 @@ patterns = {
 }
 
 url_patterns = (
-    r"h\s*t\s*t\s*p\s*s?\s*:\s*\/\s*\/\s*" # http(s):// (protocol)
+    r"(?i)https?\s*:\s*\/\s*\/\s*" # http(s):// (protocol)
     r"(?:(?:[a-zA-Z0-9\-]\s*)+\.\s*)+(?:[a-zA-Z0-9\-]\s*)+" # domain name
     r"(?:\/\s*(?:[\w\.\-\/%=&\?]\s*)*)?" # path
 )
 
-date_pattern = (
-    r"(?:(?:\d{1,2}\s*[-/]\s*\d{1,2}\s*[-/]\s*\d{2,4})|(?:\d{1,2}\s*[a-zA-Z]{3,9}\s*\d{2,4}))", # dd-mm-yyyy or dd Month yyyy
-    r"|(?:[a-zA-Z]{3,9}\s*\d{1,2}\s*,?\s*\d{2,4})" # Month dd, yyyy
-    r"|(?:\d{1,2}\s*[a-zA-Z]{3,9})" # dd Month
-    r"|(?:[a-zA-Z]{3,9}\s*\d{1,2})" # Month dd
+date_patterns = (
+    r"(?i)(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)(?:day)?\s*,?\s*\d{1,2}(?:st|nd|rd|th)?\s*(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|January|February|March|April|May|June|July|August|September|October|November|December)\s*\d{4})" # date , dd mm yyyy"
+    r"|(?:(?:\d{1,2}\s*[-/]\s*\d{1,2}\s*[-/]\s*\d{2,4})|(?:\d{1,2}\s*(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec|january|feburary|march|april|june|july|august|september|october|december)\s*\d{2,4}))" # dd-mm-yyyy or dd Month yyyy
+    r"|(?:(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec|january|feburary|march|april|june|july|august|september|october|december)\s*\d{1,2}\s*,?\s*\d{2,4})" # Month dd, yyyy
+    r"|(?:\d{1,2}\s*(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec|january|feburary|march|april|june|july|august|september|october|december))" # dd Month
+    r"|(?:(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec|january|feburary|march|april|june|july|august|september|october|december)\s*\d{1,2})" # Month dd
 )
 
 time_pattern = (
-    r"(?:(?:\d{1,2}\s*:\d{2}\s*[AP]M)|(?:\d{1,2}\s*:\s*\d{2}))" # hh:mm AM/PM or hh:mm or hh AM/PM
-    r"|(?:\d{1,2}\s*[AP]M)" # hh AM/PM
+    r"(?i)(?:\d{1,2}\s*:\s*\d{1,2}\s*:\s*\d{1,2})" #hh:mm:ss
+    r"|(?:(?:\d{1,2}\s*:\d{2}\s*[AP]M)|(?:\d{1,2}\s*:\s*\d{2}))" # hh:mm AM/PM or hh:mm or hh AM/PM
     r"|(?:\d{1,2}\s*:\s*\d{2})" # hh:mm
+)
+
+phone_number_pattern = (
+    r"(?:\+\d{1,3}\s*\(\d{3}\)\s*\d{3}\s*[-/]?\s*\d{4})"
+    r"|(?:\d{10,11})"
+    r"|(?:\+\d{1,3}\s*\d{1,2}\s*[-/]?\s*\d{3,4}\s*[-/]?\s*\d{4})"
+    r"|(?:\+\d{1,3}\s*\d{9})"
+    r"|(?:\+\d{2,5}\s*\d{5,8})"
+    r"|(?:\(\d{1,3}\)\s*\d{3,4}\s*[-/]?\d{4})"
+    r"|(?:\d{1}\s*\d{3}\s*\d{3}\s*\d{4})"
+    r"|(?:\d{4,5}\s*[-/]?\s*\d{4,5})"
+)
+
+email_pattern = r'(?i)[a-zA-Z0-9._%+-]+\@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+
+spaced_out_email_pattern = r"[a-zA-Z0-9._%+-]+\s*@\s*(?:[a-zA-Z0-9-]+\s*\.\s*)+[a-zA-Z]{2,}"
+
+money_pattern = (
+    r"(?:(\u0024|\u00A2|\u00A3|\u00A5|USD|EUR|CAD|JPY|AUD|GBP|KRW)\s?\d+\s?\.\s?\d{1,3})"
+    r"|(?:\d+\s?\.\s?\d{1,3}\s?(USD|EUR|CAD|JPY|AUD|GBP|KRW|\u0024|\u00A2|\u00A3|\u00A5))"
 )
