@@ -141,8 +141,13 @@ def stemming(text: list):
     processed_text = " ".join([stemmer.stem(t) for t in text])
     return processed_text
 
-def vectorizing(text: List[str], vectorizer: CountVectorizer | TfidfVectorizer):
-    if not isinstance(vectorizer, (CountVectorizer, TfidfVectorizer)):
-        raise TypeError("Argument should be declared from CountVectorizer or TfidfVectorizer")
+def vectorizing(text: List[str], vectorizing_type: str, min_df=4):
+    processed_type = vectorizing_type.lower().replace("-", "").replace(" ", "")
+    if processed_type in ["count", "countvectorizer", "countvector", "countv"]:
+        vectorizer = CountVectorizer(min_df=min_df)
+    elif processed_type in ["tfidf", "tfidfvectorzier", "tfidfvector", "tfidfv"]:
+        vectorizer = TfidfVectorizer(min_df=min_df)
+    else:
+        raise ValueError("Not a vectorizing type")
     X = vectorizer.fit_transform(text)
     return X
