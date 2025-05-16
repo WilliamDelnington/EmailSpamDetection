@@ -9,9 +9,12 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.base import BaseEstimator
+from sklearn.preprocessing import FunctionTransformer
 import torch.nn as nn
 import torch
 import matplotlib.pyplot as plt
+import numpy as np
+import traceback as trb
 
 class RecurrentNN(nn.Module):
     def __init__(self, vocab_size, embedding_size, hidden_size, output_size):
@@ -77,27 +80,26 @@ class ClassificationModel:
             raise TypeError("Classification model must be built from sklearn")
         self.model = model
 
-        match self.model:
-            case isinstance(self.model, svm.SVC):
-                self.name = "SVM"
-            case isinstance(self.model, GaussianNB):
-                self.name = "Gaussian Naive Bayes"
-            case isinstance(self.model, MultinomialNB):
-                self.name = "Multinomial Naive Bayes"
-            case isinstance(self.model, BernoulliNB):
-                self.name = "Bernoulli Naive Bayes"
-            case isinstance(self.model, RandomForestClassifier):
-                self.name = "Random Forest"
-            case isinstance(self.model, DecisionTreeClassifier):
-                self.name = "Decision Tree"
-            case isinstance(self.model, LogisticRegression):
-                self.name = "Logistic Regression"
-            case isinstance(self.model, KNeighborsClassifier):
-                self.name = "K-nearest Neighbors"
-            case isinstance(self.model, AdaBoostClassifier):
-                self.name = "AdaBoost"
-            case _:
-                self.name = ""
+        if isinstance(self.model, svm.SVC):
+            self.name = "SVM"
+        elif isinstance(self.model, GaussianNB):
+            self.name = "Gaussian Naive Bayes"
+        elif isinstance(self.model, MultinomialNB):
+            self.name = "Multinomial Naive Bayes"
+        elif isinstance(self.model, BernoulliNB):
+            self.name = "Bernoulli Naive Bayes"
+        elif isinstance(self.model, RandomForestClassifier):
+            self.name = "Random Forest"
+        elif isinstance(self.model, DecisionTreeClassifier):
+            self.name = "Decision Tree"
+        elif isinstance(self.model, LogisticRegression):
+            self.name = "Logistic Regression"
+        elif isinstance(self.model, KNeighborsClassifier):
+            self.name = "K-nearest Neighbors"
+        elif isinstance(self.model, AdaBoostClassifier):
+            self.name = "AdaBoost"
+        else:
+            self.name = ""
 
         self.X = X
         self.y = y
@@ -108,12 +110,38 @@ class ClassificationModel:
         self.X_test = None
         self.y_test = None
 
-    def train(self):
-        self.X_train, self.y_train, self.X_test, self.y_test = train_test_split(
+    def train(self, partial=False):
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
             self.X, self.y, test_size=self.test_size, random_state=self.random_state
         )
 
-        self.model.fit(self.X_train, self.y_train)
+        conversions = []
+
+        try:
+            self.__fitting_model(self.X_train, self.y_train, partial=partial)
+
+        except (TypeError, AttributeError):
+            print("Dense data is required")
+            print("Converting to dense array")
+
+            func = FunctionTransformer(lambda x: x.todense(), accept_sparse=True)
+            self.X_train = func.transform(self.X_train)
+            self.X_test = func.transform(self.X_test)
+
+            try:
+                self.__fitting_model(self.X_train, self.y_train, partial=partial)
+
+            except (TypeError):
+                print("Numpy array required")
+                print("Converting to numpy array")
+
+                self.X_train = np.array(self.X_train)
+                self.X_test = np.array(self.X_test)
+
+                self.__fitting_model(self.X_train, self.y_train, partial=partial)
+
+            except Exception as e:
+                print("Error in fitting model:", trb.print_exc())
 
     def evaluate(self):
         if (self.X_train is None or
@@ -132,8 +160,14 @@ class ClassificationModel:
         if not hasattr(self, "confusion_matrix"):
             raise ValueError("Model is not evaluated.")
         
-        disp = ConfusionMatrixDisplay(self.confusion_matrix, display_labels=self.model.classes__)
+        disp = ConfusionMatrixDisplay(self.confusion_matrix, display_labels=self.model.classes_)
 
         disp.plot(cmap=plt.cm.Blues)
         plt.title(f"{self.name} Confusion Matrix")
         plt.show()
+
+    def __fitting_model(self, X, y, partial=False):
+        if not partial:
+            self.model.fit(X, y)
+        else:
+            self.model.partial_fit(X, y)
