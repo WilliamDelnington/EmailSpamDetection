@@ -10,6 +10,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.base import BaseEstimator
 from sklearn.preprocessing import FunctionTransformer
+from sklearn.decomposition import PCA, TruncatedSVD
 import torch.nn as nn
 import torch
 import matplotlib.pyplot as plt
@@ -50,7 +51,6 @@ class LongShortTermMemory(nn.Module):
 models = [
     svm.SVC(kernel="linear"),
     svm.SVC(kernel="rbf"),
-    GaussianNB(),
     MultinomialNB(),
     BernoulliNB(),
     RandomForestClassifier(),
@@ -65,7 +65,7 @@ class EvaluateError(Exception):
         super(Exception, self).__init__(*args)
 
 class ClassificationModel:
-    def __init__(self, model, X, y, test_size=0.2, random_state=42):
+    def __init__(self, model):
         """
         Initialize the classifier with a sklearn model
 
@@ -101,47 +101,65 @@ class ClassificationModel:
         else:
             self.name = ""
 
-        self.X = X
-        self.y = y
-        self.test_size = test_size
-        self.random_state = random_state
         self.X_train = None
         self.y_train = None
         self.X_test = None
         self.y_test = None
 
-    def train(self, partial=False):
+    def train(self, X, y, random_state=42, test_size=0.2, partial=False):
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-            self.X, self.y, test_size=self.test_size, random_state=self.random_state
+            X, y, test_size=test_size, random_state=random_state
         )
 
-        conversions = []
+        # try:
+        #     self.__fitting_model(self.X_train, self.y_train, partial=partial)
 
-        try:
-            self.__fitting_model(self.X_train, self.y_train, partial=partial)
+        # except (TypeError, AttributeError):
+        #     print("Dense data is required")
+        #     print("Converting to dense array")
 
-        except (TypeError, AttributeError):
-            print("Dense data is required")
-            print("Converting to dense array")
+        #     func = FunctionTransformer(lambda x: x.todense(), accept_sparse=True)
+        #     self.X_train = func.transform(self.X_train)
+        #     self.X_test = func.transform(self.X_test)
 
-            func = FunctionTransformer(lambda x: x.todense(), accept_sparse=True)
-            self.X_train = func.transform(self.X_train)
-            self.X_test = func.transform(self.X_test)
+        #     try:
+        #         self.__fitting_model(self.X_train, self.y_train, partial=partial)
 
+        #     except (TypeError):
+        #         print("Numpy array required")
+        #         print("Converting to numpy array")
+
+        #         try:
+        #             self.X_train = np.array(self.X_train)
+        #             self.X_test = np.array(self.X_test)
+
+        #             self.__fitting_model(self.X_train, self.y_train, partial=partial)
+        #         except MemoryError:
+        #             svd = TruncatedSVD(n_components=100)
+        #             self.X_train = svd.fit_transform(self.X_train)
+        #             self.X_test = svd.transform(self.X_test)
+        #             self.__fitting_model(self.X_train, self.y_train, partial=partial)
+
+        #     except Exception as e:
+        #         print("Error in fitting model:", trb.print_exc())
+
+        if isinstance(self.model, GaussianNB):
             try:
-                self.__fitting_model(self.X_train, self.y_train, partial=partial)
+                func = FunctionTransformer(lambda x: x.todense(), accept_sparse=True)
+                X_temp = func.transform(self.X_train)
+                self.X_test = func.transform(self.X_test)
 
-            except (TypeError):
-                print("Numpy array required")
-                print("Converting to numpy array")
-
-                self.X_train = np.array(self.X_train)
+                self.__fitting_model(X_temp, self.y_train, partial=partial)
+            except (TypeError, AttributeError):
+                func = FunctionTransformer(lambda x: x.toarray(), accept_sparse=True)
+                X_temp = np.array(self.X_train)
                 self.X_test = np.array(self.X_test)
 
-                self.__fitting_model(self.X_train, self.y_train, partial=partial)
+                self.__fitting_model(X_temp, self.y_train, partial=partial)
 
-            except Exception as e:
-                print("Error in fitting model:", trb.print_exc())
+        else:
+            self.__fitting_model(self.X_train, self.y_train, partial=partial)
+
 
     def evaluate(self):
         if (self.X_train is None or

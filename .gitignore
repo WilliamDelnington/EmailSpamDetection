@@ -17,3 +17,9 @@ EnronDatasetTests/enron6
 SpamAssassinDatasetTests/easy_ham
 SpamAssassinDatasetTests/hard_ham
 SpamAssassinDatasetTests/spam_2
+EnronDatasetTests/enron1.csv
+EnronDatasetTests/enron2.csv
+EnronDatasetTests/enron3.csv
+EnronDatasetTests/enron4.csv
+EnronDatasetTests/enron5.csv
+EnronDatasetTests/enron6.csv
