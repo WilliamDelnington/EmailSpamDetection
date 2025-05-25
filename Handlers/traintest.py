@@ -9,26 +9,130 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.base import BaseEstimator
-from sklearn.preprocessing import FunctionTransformer
-from sklearn.decomposition import PCA, TruncatedSVD
-import torch.nn as nn
+from sklearn.preprocessing import FunctionTransformer, StandardScaler
+from keras.src.models import Sequential
+from keras.src.layers import Dense, Conv1D, GlobalMaxPooling1D, Embedding, Dropout, LSTM, Bidirectional
+from keras.src.layers import TextVectorization
 import torch
+import torch.nn as nn
 import matplotlib.pyplot as plt
 import numpy as np
 import traceback as trb
+import pandas as pd
 
-class RecurrentNN(nn.Module):
-    def __init__(self, vocab_size, embedding_size, hidden_size, output_size):
-        super(RecurrentNN, self).__init__()
-        self.embedding = nn.Embedding(vocab_size, embedding_size)
-        self.rnn = nn.RNN(embedding_size, hidden_size, batch_first=True)
-        self.fc = nn.Linear(hidden_size, output_size)
+class PreprocessAndTrainWithRNN(nn.Module):
+    # def __init__(self, vocab_size, embedding_size, num_filters, filter_sizes, hidden_size, output_size, dropout=0.2):
+    def __init__(self):
+        self.model = Sequential()
 
-    def forward(self, x):
-        embedded = self.embedding(x)
-        out, _ = self.rnn(embedded)
-        out = self.fc(out[:, -1, :])
-        return out
+    def load_data(self, 
+                  data, 
+                  input_features:list=None, 
+                  output_feature:str=None
+                  ):
+        """
+        Load and preprocess the data.
+        Parameters:
+        - data: The input data to be processed.
+        - features: Optional, specific features to be used from the data.
+        """
+        # Implement if data is a DataFrame object
+        if isinstance(data, pd.DataFrame):
+            if input_features is None and output_feature is None:
+                print("The input features are not specified. The last column will be used as the output feature, while the rest will be used as input features.")
+                self.X = data.columns[:-1].tolist()
+                self.y = data.columns[-1]
+            elif input_features is None:
+                self.X = data[input_features].tolist()
+                self.y = data[[f for f in data.columns if f not in input_features]].tolist()
+            elif output_feature is None:
+                self.X = data.drop(columns=[output_feature]).tolist()
+                self.y = data[output_feature].tolist()
+            else:
+                self.X = data[input_features].tolist()
+                self.y = data[output_feature].tolist()
+
+        elif isinstance(data, (np.ndarray, list)):
+            self.X = data[:, :-1]
+            self.y = data[:, -1]
+
+        else:
+            raise TypeError("Unsupported data type. Please provide a DataFrame, numpy array, or list.")
+        
+    def split(self, test_size=0.2, random_state=42):
+        """
+        Split the data into training and testing sets.
+        Parameters:
+        - test_size: The proportion of the dataset to include in the test split.
+        - random_state: Controls the shuffling applied to the data before applying the split.
+        """
+        if not hasattr(self, 'X') or not hasattr(self, 'y'):
+            raise ValueError("Data has not been loaded. Call load_data() first.")
+        
+        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
+            self.X, self.y, test_size=test_size, random_state=random_state
+        )
+
+    def preprocess(self, max_features=10000, sequence_length=100):
+        self.x_train = np.array(self.x_train)
+        self.x_test = np.array(self.x_test)
+        self.vectorizer = TextVectorization(
+            max_tokens=max_features, 
+            output_mode='int', 
+            output_sequence_length=sequence_length
+        )
+        self.vectorizer.adapt(self.x_train)
+
+
+    def build(self, max_features=10000, 
+              embedding_size=128, 
+              num_filters=64, 
+              filter_sizes=3, 
+              hidden_size=128, 
+              dropout_rate=0.2,
+              epochs=10,
+              batch_size=32):
+        
+        self.model.add(self.vectorizer)
+    
+        self.model.add(Embedding(
+            input_dim=max_features, 
+            output_dim=embedding_size
+        ))
+        self.model.add(Conv1D(
+            filters=num_filters, 
+            kernel_size=filter_sizes, 
+            activation='relu',
+            padding='valid',
+            strides=1
+        ))
+        self.model.add(GlobalMaxPooling1D())
+        self.model.add(Dropout(dropout_rate))
+        self.model.add(Dense(hidden_size, activation='relu'))
+        self.model.add(Dense(1, activation='sigmoid'))
+        self.model.compile(
+            loss='binary_crossentropy',
+            optimizer='adam',
+            metrics=['accuracy', 'precision', 'recall']
+        )
+
+        self.model.fit(
+            self.x_train, 
+            self.y_train, 
+            epochs=epochs, 
+            batch_size=batch_size, 
+            validation_data=(self.x_test, self.y_test)
+        )
+    
+    def evaluate(self):
+        if not hasattr(self, 'x_test') or not hasattr(self, 'y_test'):
+            raise ValueError("Model has not been trained yet. Call fit() first.")
+        
+        y_pred = self.model.predict(self.x_test)
+        y_pred_classes = (y_pred > 0.5).astype(int)
+
+        report = classification_report(self.y_test, y_pred_classes)
+        print(report)
     
 
 class LongShortTermMemory(nn.Module):
