@@ -11,6 +11,10 @@ import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 nltk.download('punkt')
 from typing import List
+import itertools
+from collections import Counter
+import matplotlib.pyplot as plt
+from functools import partial
 
 def load_emails(path, label_types=["ham", "spam"]):
     """
@@ -151,3 +155,74 @@ def vectorizing(text: List[str], vectorizing_type: str, min_df=4):
         raise ValueError("Not a vectorizing type")
     X = vectorizer.fit_transform(text)
     return X
+
+preprocession = partial(
+    preprocess_text,
+    remove_numbers=True
+)
+
+class EnronPreprocess:
+    def __init__(self, enron: pd.DataFrame, name:str):
+        self.__enron = enron
+        self.name = name
+
+    def preprocess_data(self, save=False):
+        combined_input = self.__enron.apply(
+            lambda x: f"{x['Subject']} {x['Body']}",
+            axis=1
+        )
+        self.__preprocessed_data_X = combined_input.apply(preprocession)
+        self.__preprocessed_data_y = self.__enron["Label"]
+        if save:
+            self.save_preprocessed_data(f"./csv/preprocessed_{self.name}_data.csv")
+        return self.__preprocessed_data_X, self.__preprocessed_data_y
+
+    def __get_counter(self):
+        self.__word_list = list(itertools.chain.from_iterable(self.__preprocessed_data_X))
+        self.__word_counter = Counter(self.__word_list)
+
+    def visualize_wordcloud(self, minimum_occurance=4):
+        self.__get_counter()
+
+        if self.__preprocessed_data_X is None:
+            return
+
+        print(f"Total number of words: {len(self.__word_counter.keys())}")
+        print(f"Total number of words that appear less than {minimum_occurance} times")
+        print(len([key for key, value in self.__word_counter.items() if value < minimum_occurance]))
+        
+        visualize_wordcloud(self.__word_list)
+
+    def visualize_bar_chart(
+            self, 
+            most_com=15,
+            title="Top words frequencies",
+            xlabel="Words",
+            ylabel="Frequency"):
+        self.__get_counter()
+
+        most_common = self.__word_counter.most_common(most_com)
+
+        words, counts = zip(*most_common)
+
+        plt.figure(figsize=(10, 6))
+        plt.bar(words, counts, color="skyblue")
+        plt.title(title)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.tight_layout()
+        plt.show()
+
+    def save_preprocessed_data(self, path):
+        """
+        Save the preprocessed data to a CSV file.
+        """
+        if self.__preprocessed_data_X is None or self.__preprocessed_data_y is None:
+            raise ValueError("Preprocessed data is not available.")
+        
+        df = pd.DataFrame({
+            'Text': self.__preprocessed_data_X,
+            'Label': self.__preprocessed_data_y
+        })
+        df.to_csv(path, index=False)
+        print(f"Preprocessed data saved to {path}.")
