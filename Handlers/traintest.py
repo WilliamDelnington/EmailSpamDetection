@@ -22,6 +22,7 @@ import traceback as trb
 import pandas as pd
 import scipy
 import joblib
+import json
 
 model_parameters = {
     "SVM": {
@@ -405,6 +406,15 @@ class ClassificationModel:
         elif isinstance(self.model, AdaBoostClassifier):
             self.model_name = "AdaBoost"
             self.model_parameters = model_parameters["AdaBoost"]
+        elif isinstance(self.model, SGDClassifier):
+            self.model_name = "Stochastic Gradient Descent"
+            self.model_parameters = model_parameters["SGDClassifier"]
+        elif isinstance(self.model, GradientBoostingClassifier):
+            self.model_name = "Gradient Boosting"
+            self.model_parameters = model_parameters["GradientBoosting"]
+        elif isinstance(self.model, Perceptron):
+            self.model_name = "Perceptron"
+            self.model_parameters = model_parameters["Perceptron"]
         else:
             self.model_name = ""
             self.model_parameters = {}
@@ -417,7 +427,7 @@ class ClassificationModel:
         self.y_test = None
         self.through_validation = False
         self.confusion_matrix = None
-        self.grid_searching = False if not self.__is_trained() else True
+        self.grid_searching = False
         self.normal_training = False if not self.__is_trained() else True
 
     def __split_train_val_test(self, X, y, test_size=0.2, valid_size=0, random_state=42):
@@ -477,7 +487,7 @@ class ClassificationModel:
 
         if save_model:
             try:
-                self.__save_model(self.model, f"./models/{self.model_name}_{self.data_name}_normal.joblib")
+                self.__save_model(self.model, f"./models/normal/{self.model_name}_{self.data_name}_normal.joblib")
             except Exception as e:
                 print(f"Error saving model: {e}")
                 trb.print_exc()
@@ -517,7 +527,7 @@ class ClassificationModel:
 
         if save_model:
             try:
-                self.__save_model(self.grid, f"./models/{self.model_name}_{self.data_name}_grid.joblib")
+                self.__save_model(self.grid, f"./models/grid/{self.model_name}_{self.data_name}_grid.joblib")
             except Exception as e:
                 print(f"Error saving model: {e}")
                 trb.print_exc()
@@ -576,7 +586,7 @@ class ClassificationModel:
 
         self.confusion_matrix = confusion_matrix(self.y_test, y_pred)
         if detailed:
-            metrics = {
+            self.metrics = {
                 "accuracy": accuracy_score(self.y_test, y_pred),
                 "weighted_precision": precision_score(self.y_test, y_pred, average='weighted'),
                 "wighted_recall": recall_score(self.y_test, y_pred, average='weighted'),
@@ -586,9 +596,24 @@ class ClassificationModel:
                 "macro_f1": f1_score(self.y_test, y_pred, average='macro'),
                 "roc_auc": roc_auc_score(self.y_test, y_pred)
             }
-            return metrics
+            detailed_metrics = {
+                "dataset": self.data_name,
+                "model": self.model_name,
+                "type": "grid_search" if self.grid_searching else "normal",
+                "metrics": self.metrics,
+                "confusion_matrix": self.confusion_matrix
+            }
+            if not self.grid_searching:
+                return detailed_metrics
+            else:
+                self.grid_searching = False
+                detailed_metrics["best_parameters"] = self.grid.best_params_
+                detailed_metrics["best_score"] = self.grid.best_score_
+                return detailed_metrics
 
+        self.grid_searching = False
         return classification_report(self.y_test, y_pred)
+
     
     def print_simple_confusion_matrix(self):
         if self.confusion_matrix is None:
@@ -658,5 +683,22 @@ class ClassificationModel:
         """
         joblib.dump(model, path)
 
-    def save_report(self):
-        pass
+def add_to_json_array(filename, new_object, array_key=None, mode="overwrite"):
+    if mode != "overwrite":
+        try:
+            with open(filename, 'r') as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            data = [] if array_key is None else {array_key: []}
+        
+        if array_key:
+            # JSON structure: {"items": [...]}
+            if array_key not in data:
+                data[array_key] = []
+            data[array_key].append(new_object)
+        else:
+            # JSON structure: [...]
+            data.append(new_object)
+    
+    with open(filename, 'w') as f:
+        json.dump(new_object, f, indent=4)
