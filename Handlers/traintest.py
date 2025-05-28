@@ -2,7 +2,7 @@ import scipy.sparse
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.svm import SVC
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
-from sklearn.metrics import roc_auc_score, roc_curve, auc
+from sklearn.metrics import roc_auc_score, roc_curve, auc, precision_recall_fscore_support
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
 from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
@@ -453,6 +453,8 @@ class ClassificationModel:
             raise TypeError("Input data must be a numpy array, pandas DataFrame, list, or pandas Series.")
         if self.__is_trained():
             print("The model has already been trained. This process will overwrite the previous training.")
+
+
         self.__split_train_val_test(X, y, test_size=test_size, valid_size=valid_size, random_state=random_state)
 
         if isinstance(self.model, GaussianNB):
@@ -655,3 +657,6 @@ class ClassificationModel:
         - filename: The name of the file to save the model.
         """
         joblib.dump(model, path)
+
+    def save_report(self):
+        pass

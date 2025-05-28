@@ -1,6 +1,7 @@
 Datasets
 test.py
 test2.py
+test3.py
 TempData
 coyo-700m
 MaliciousWebsiteFeatures24M
@@ -10,6 +11,8 @@ other_spam_emails.csv
 .qodo
 EnronDatasetTests/EnronDataset
 EnronDatasetTests/csv
+EnronDatasetTests/models
+EnronDatasetTests/preprocess
 SpamAssassinDatasetTests/easy_ham
 SpamAssassinDatasetTests/hard_ham
 SpamAssassinDatasetTests/spam_2
