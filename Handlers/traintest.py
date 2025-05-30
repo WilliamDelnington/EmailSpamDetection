@@ -10,6 +10,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression, SGDClassifier, Perceptron, PassiveAggressiveClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.base import BaseEstimator
+from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.utils.validation import check_is_fitted
 from sklearn.exceptions import NotFittedError
@@ -91,6 +92,11 @@ model_parameters = {
         "loss": ["hinge", "squared_hinge"],
         "max_iter": [500, 1000, 2000],
         "tol": [1e-3, 1e-4, 1e-5],
+    },
+    "MLPClassifier": {
+        "activation": ["relu", "identity", "logistic", "tanh"],
+        "learning_rate": [0.001, 0.01, 0.1],
+        "solver": ["lbfgs", "sgd", "adam"]
     }
 }
 
@@ -228,7 +234,7 @@ class PreprocessAndTrainWithCNN:
 
         report = classification_report(self.y_test, y_pred_classes)
         print(report)
-    
+
 
 class PreprocessAndTrainWithRNN:
     def __init__(self):
@@ -350,24 +356,25 @@ class PreprocessAndTrainWithRNN:
         report = classification_report(self.y_test, y_pred_classes)
         print(report)
 
-models = [
-    SVC(),
-    MultinomialNB(),
-    BernoulliNB(),
-    RandomForestClassifier(),
-    DecisionTreeClassifier(),
-    AdaBoostClassifier(),
-    LogisticRegression(),
-    KNeighborsClassifier(),
-    SGDClassifier(),
-    HistGradientBoostingClassifier(
-        early_stopping=True, 
-        n_iter_no_change=10,
-        max_iter=200,
-        max_bins=199),
-    Perceptron(),
-    PassiveAggressiveClassifier()
-]
+def get_classification_models():
+    return [
+        SVC(),
+        MultinomialNB(),
+        BernoulliNB(),
+        RandomForestClassifier(),
+        DecisionTreeClassifier(),
+        AdaBoostClassifier(),
+        LogisticRegression(n_jobs=4),
+        KNeighborsClassifier(n_jobs=4),
+        SGDClassifier(),
+        # HistGradientBoostingClassifier(
+        #     early_stopping=True, 
+        #     n_iter_no_change=6,
+        #     max_bins=199),
+        Perceptron(),
+        PassiveAggressiveClassifier(),
+        MLPClassifier(hidden_layer_sizes=(80,), early_stopping=True)
+    ]
 
 class EvaluateError(Exception):
     def __init__(self, *args):
@@ -429,6 +436,9 @@ class ClassificationModel:
         elif isinstance(self.model, PassiveAggressiveClassifier):
             self.model_name = "Passive-Aggressive"
             self.model_parameters = model_parameters["PassiveAggressive"]
+        elif isinstance(self.model, MLPClassifier):
+            self.model_name = "Multi-layer Perceptron"
+            self.model_parameters = model_parameters["MLPClassifier"]
         else:
             self.model_name = ""
             self.model_parameters = {}
@@ -442,7 +452,8 @@ class ClassificationModel:
         self.through_validation = False
         self.confusion_matrix = None
         self.grid_searching = False
-        self.normal_training = False if not self.__is_trained() else True
+        self.normal_training = False
+        self.epoch_training = False
 
     def __split_train_val_test(self, X, y, test_size=0.2, valid_size=0, random_state=42):
         """
@@ -513,18 +524,39 @@ class ClassificationModel:
                 print(f"Error saving model: {e}")
                 trb.print_exc()
 
-    # def train_with_epochs(self, X, y, epochs=10, batch_size=32, random_state=42, test_size=0.2, valid_size=0):
-    #     if not self.__is_valid_input(X):
-    #         raise TypeError("Input data must be a numpy array, pandas DataFrame, list, pandas Series, or Scipy Matrix.")
+    def train_with_epochs(self, X, y, epochs=10, random_state=42, test_size=0.2, valid_size=0, save_model=False):
+        if not self.__is_valid_input(X):
+            raise TypeError("Input data must be a numpy array, pandas DataFrame, list, pandas Series, or Scipy Matrix.")
         
-    #     self.__split_train_val_test(X, y, test_size=test_size, valid_size=valid_size, random_state=random_state)
+        self.__split_train_val_test(X, y, test_size=test_size, valid_size=valid_size, random_state=random_state)
 
-    #     if hasattr(self.model, 'fit'):
-    #         self.model.fit(self.X_train, self.y_train, epochs=epochs, batch_size=batch_size)
-    #     else:
-    #         raise TypeError("The model does not support training with epochs.")
-        
-    #     self.normal_training = True
+        self.training_accuracies = []
+        self.validation_accuracies = []
+        self.epochs = range(epochs)
+
+        for epoch in self.epochs:
+            try:
+                self.__fitting_model(self.X_train, self.y_train)
+            except TypeError:
+                self.X_train = self.X_train.toarray()
+                self.__fitting_model(self.X_train, self.y_train)
+            y_pred_train = self.model.predict(self.X_train)
+            train_accuracy = accuracy_score(self.y_train, y_pred_train)
+            self.training_accuracies.append(train_accuracy)
+            if valid_size != 0:
+                y_pred_val = self.model.predict(self.X_val)
+                val_accuracy = accuracy_score(self.y_val, y_pred_val)
+                self.validation_accuracies.append(val_accuracy)
+
+        if save_model:
+            try:
+                self.__save_model(self.model, f"./models/normal/{self.model_name}_{self.data_name}_normal.joblib")
+            except Exception as e:
+                print(f"Error saving model: {e}")
+                trb.print_exc()
+
+        self.epoch_training = True
+        del self.X_train, self.y_train
 
     def train_with_finding_best_parameters(
             self, 
@@ -598,26 +630,33 @@ class ClassificationModel:
                 print(f"Error saving model: {e}")
                 trb.print_exc()
 
-    def plot_grid(self, x_features, y_features, xlabel="X Label", ylabel="Y Label"):
-        if not self.grid_searching:
-            raise ValueError("Grid search has not been performed yet.")
-        
-        results = pd.DataFrame(self.grid.cv_results_)
+    def plot_train_val_accuracy_after_epochs(self, xlabel="X Label", ylabel="Y Label", save_plot=False):
+        if not self.__is_trained():
+            raise ValueError("Model has not been trained yet.")
         
         plt.figure(figsize=(10, 6))
         plt.plot(
-            results[x_features], 
-            results[y_features], 
-            marker='o', 
-            linestyle='-', 
-            color='b'
-        )
-        plt.title(f"Grid Search Results for {self.model_name}")
+            self.epochs, 
+            self.training_accuracies, 
+            color="blue", 
+            linestyle="--", 
+            linewidth=2, 
+            label="Training Accuracy")
+        if self.X_val is not None:
+            plt.plot(
+                self.epochs, 
+                self.validation_accuracies, 
+                color="red", 
+                linestyle="--", 
+                linewidth=2,
+                label="Validation Accuracy")
+        plt.title(f"Train-Val Accuracy Results for {self.model_name}")
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
         plt.grid(True, alpha=0.3)
+        if save_plot:
+            plt.savefig(f"./figs/normal/{self.model_name}_{self.data_name}_normal.jpg")
         plt.show()
-
 
     def get_best_estimator(self, put_right_in_the_model=False, free_memory=False):
         """
@@ -671,8 +710,12 @@ class ClassificationModel:
                 "confusion_matrix": self.confusion_matrix
             }
             if not self.grid_searching:
+                if hasattr(self, "epochs"):
+                    detailed_metrics["epochs"] = len(self.epochs)
                 return detailed_metrics
             else:
+                if hasattr(self, "epochs"):
+                    detailed_metrics["epochs"] = len(self.epochs)
                 self.grid_searching = False
                 detailed_metrics["best_parameters"] = self.grid.best_params_
                 detailed_metrics["best_score"] = self.grid.best_score_

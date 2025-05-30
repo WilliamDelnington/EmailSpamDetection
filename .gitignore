@@ -13,8 +13,10 @@ EnronDatasetTests/EnronDataset
 EnronDatasetTests/csv
 EnronDatasetTests/models
 EnronDatasetTests/preprocess
+EnronDatasetTests/figs
 SpamAssassinDatasetTests/easy_ham
 SpamAssassinDatasetTests/hard_ham
 SpamAssassinDatasetTests/spam_2
 SpamAssassinDatasetTests/models
+SpamAssassinDatasetTests/figs
 LingspamDatasetTests/models
