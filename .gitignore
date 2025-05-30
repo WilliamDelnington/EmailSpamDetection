@@ -17,3 +17,4 @@ SpamAssassinDatasetTests/easy_ham
 SpamAssassinDatasetTests/hard_ham
 SpamAssassinDatasetTests/spam_2
 SpamAssassinDatasetTests/models
+LingspamDatasetTests/models

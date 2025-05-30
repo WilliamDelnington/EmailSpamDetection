@@ -1,13 +1,13 @@
 import scipy.sparse
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV
 from sklearn.svm import SVC
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import roc_auc_score, roc_curve, auc, precision_recall_fscore_support
 from sklearn.metrics import ConfusionMatrixDisplay
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, HistGradientBoostingClassifier
 from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.linear_model import LogisticRegression, SGDClassifier, Perceptron
+from sklearn.linear_model import LogisticRegression, SGDClassifier, Perceptron, PassiveAggressiveClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.base import BaseEstimator
 from sklearn.preprocessing import FunctionTransformer
@@ -23,10 +23,11 @@ import pandas as pd
 import scipy
 import joblib
 import json
+import math
 
 model_parameters = {
     "SVM": {
-        "kernel": ["linear", "rbf", "poly", "sigmoid"],
+        "kernel": ["linear", "rbf", "sigmoid"],
         "C": [0.1, 1, 10],
         "gamma": ["scale", "auto"],
     },
@@ -58,34 +59,39 @@ model_parameters = {
         "learning_rate": [0.01, 0.1, 1.0],
     },
     "LogisticRegression": {
-        "penalty": ["l2", "l1", "elasticnet", None],
+        "penalty": ["l2", "elasticnet", None],
         "C": [0.1, 1, 10],
-        "solver": ["newton-cg", "lbfgs", "liblinear", "sag", "saga"],
+        "solver": ["lbfgs", "liblinear", "sag", "saga"],
     },
     "KNeighbors": {
-        "n_neighbors": [3, 5, 7, 9],
+        "n_neighbors": [3, 5, 7],
         "weights": ["uniform", "distance"],
         "algorithm": ["auto", "ball_tree", "kd_tree", "brute"],
     },
     "SGDClassifier": {
-        "loss": ["hinge", "log", "squared_hinge", "modified_huber"],
-        "penalty": ["l2", "l1", "elasticnet"],
+        "loss": ["hinge", "log_loss", "squared_hinge"],
+        "penalty": ["l2", "elasticnet"],
         "alpha": [0.0001, 0.001, 0.01],
         "learning_rate": ["constant", "optimal", "invscaling", "adaptive"],
     },
-    "GradientBoosting": {
-        "n_estimators": [50, 100, 200],
-        "learning_rate": [0.01, 0.1, 0.2],
-        "max_depth": [3, 5, 7],
-        "min_samples_split": [2, 5, 10],
-        "min_samples_leaf": [1, 2, 4],
+    "HistGradientBoosting": {
+        "n_estimators": [100, 200],
+        "max_depth": [5, 7],
+        "min_samples_split": [2, 5],
+        "min_samples_leaf": [5, 10, 20],
     },
     "Perceptron": {
-        "penalty": ["l2", "l1", "elasticnet"],
+        "penalty": ["l2", "elasticnet"],
         "alpha": [0.0001, 0.001, 0.01],
         "max_iter": [1000, 2000, 3000],
         "tol": [1e-3, 1e-4, 1e-5],
     },
+    "PassiveAggressive": {
+        "C": [0.1, 1, 10],
+        "loss": ["hinge", "squared_hinge"],
+        "max_iter": [500, 1000, 2000],
+        "tol": [1e-3, 1e-4, 1e-5],
+    }
 }
 
 class PreprocessAndTrainWithCNN:
@@ -354,8 +360,13 @@ models = [
     LogisticRegression(),
     KNeighborsClassifier(),
     SGDClassifier(),
-    GradientBoostingClassifier(),
+    HistGradientBoostingClassifier(
+        early_stopping=True, 
+        n_iter_no_change=10,
+        max_iter=200,
+        max_bins=199),
     Perceptron(),
+    PassiveAggressiveClassifier()
 ]
 
 class EvaluateError(Exception):
@@ -409,12 +420,15 @@ class ClassificationModel:
         elif isinstance(self.model, SGDClassifier):
             self.model_name = "Stochastic Gradient Descent"
             self.model_parameters = model_parameters["SGDClassifier"]
-        elif isinstance(self.model, GradientBoostingClassifier):
+        elif isinstance(self.model, HistGradientBoostingClassifier):
             self.model_name = "Gradient Boosting"
-            self.model_parameters = model_parameters["GradientBoosting"]
+            self.model_parameters = model_parameters["HistGradientBoosting"]
         elif isinstance(self.model, Perceptron):
             self.model_name = "Perceptron"
             self.model_parameters = model_parameters["Perceptron"]
+        elif isinstance(self.model, PassiveAggressiveClassifier):
+            self.model_name = "Passive-Aggressive"
+            self.model_parameters = model_parameters["PassiveAggressive"]
         else:
             self.model_name = ""
             self.model_parameters = {}
@@ -482,8 +496,15 @@ class ClassificationModel:
                 self.__fitting_model(X_temp, self.y_train, partial=partial)
 
         else:
-            self.__fitting_model(self.X_train, self.y_train, partial=partial)
+            try:
+                self.__fitting_model(self.X_train, self.y_train, partial=partial)
+            except TypeError:
+                self.X_train = self.X_train.toarray()
+                self.__fitting_model(self.X_train, self.y_train, partial=partial)
         self.normal_training = True
+
+        if not partial:
+            del self.X_train, self.y_train
 
         if save_model:
             try:
@@ -505,24 +526,69 @@ class ClassificationModel:
         
     #     self.normal_training = True
 
-    def validation(self, X, y, score_priority="accuracy", random_state=42, test_size=0.2, valid_size=0, save_model=False):
+    def train_with_finding_best_parameters(
+            self, 
+            X, 
+            y, 
+            mode="grid", 
+            score_priority="accuracy", 
+            random_state=42, 
+            test_size=0.2, 
+            valid_size=0,
+            cv=5, 
+            n_jobs=5,
+            scores:list=["accuracy", "precision", "recall", "f1"], 
+            save_model=False):
         if not self.__is_valid_input(X):
             raise TypeError("Input data must be a numpy array, pandas DataFrame, list, or pandas Series.")
         
-        self.__split_train_val_test(X, y, test_size=test_size, valid_size=valid_size, random_state=random_state)
+        self.__split_train_val_test(
+            X, 
+            y, 
+            test_size=test_size, 
+            valid_size=valid_size, 
+            random_state=random_state)
 
-        self.grid = GridSearchCV(
-            self.model, 
-            self.model_parameters, 
-            cv=5, 
-            scoring=[
-                "accuracy", 
-                "precision", 
-                "recall", 
-                "f1"
-            ],
-            refit=score_priority)
-        self.grid.fit(self.X_train, self.y_train)
+        if mode.lower() == "grid":
+            if self.__get_total_number_of_combination() > 60:
+                self.grid = RandomizedSearchCV(
+                    self.model,
+                    self.model_parameters,
+                    cv=cv,
+                    n_jobs=n_jobs,
+                    n_iter=60,
+                    random_state=random_state,
+                    scoring=scores,
+                    refit=score_priority
+                )
+            else:
+                self.grid = GridSearchCV(
+                    self.model, 
+                    self.model_parameters,
+                    cv=cv,
+                    n_jobs=n_jobs, 
+                    scoring=scores,
+                    refit=score_priority)
+        elif mode.lower() == "random":
+            ideal = self.__get_reduced_number_of_combination()
+
+            self.grid = RandomizedSearchCV(
+                self.model,
+                self.model_parameters,
+                cv=cv,
+                n_jobs=n_jobs,
+                n_iter=ideal,
+                random_state=random_state,
+                scoring=scores,
+                refit=score_priority
+            )
+        else:
+            raise ValueError("Unknown mode")
+        try:
+            self.grid.fit(self.X_train, self.y_train)
+        except TypeError:
+            self.X_train = self.X_train.toarray()
+            self.grid.fit(self.X_train, self.y_train)
         self.grid_searching = True
 
         if save_model:
@@ -553,7 +619,7 @@ class ClassificationModel:
         plt.show()
 
 
-    def get_best_estimator(self, put_right_in_the_model=False):
+    def get_best_estimator(self, put_right_in_the_model=False, free_memory=False):
         """
         Get the best estimator from the grid search.
         
@@ -573,14 +639,15 @@ class ClassificationModel:
         if put_right_in_the_model:
             self.model = self.best_estimator
 
+        if free_memory:
+            del self.X_train, self.y_train
+
     def evaluate(self, detailed=False):
         """
         Evaluate the model using the test set and return the classification report.
         Raises:
         - EvaluateError: If the model has not been trained yet.
         """
-        if not self.__is_trained():
-            raise EvaluateError("The model hasn't been trained yet.")
         
         y_pred = self.model.predict(self.X_test)
 
@@ -648,7 +715,7 @@ class ClassificationModel:
                 DecisionTreeClassifier,
                 AdaBoostClassifier,
                 SVC,
-                GradientBoostingClassifier
+                HistGradientBoostingClassifier
             )):
                 raise TypeError("The model does not support partial fitting.")
             self.model.partial_fit(X, y)
@@ -683,6 +750,26 @@ class ClassificationModel:
         """
         joblib.dump(model, path)
 
+    def __get_total_number_of_combination(self):
+        self.total_combinations = math.prod(len(v) for v in self.model_parameters.values())
+
+        return self.total_combinations
+
+    def __get_reduced_number_of_combination(self):
+
+        total_combinations = math.prod(len(v) for v in self.model_parameters.values())
+
+        if total_combinations < 10:
+            return total_combinations - 1
+        elif total_combinations < 30:
+            return 20
+        elif total_combinations < 60:
+            return int(total_combinations / 2) + 10
+        elif total_combinations < 80:
+            return 45
+        else:
+            return int(total_combinations / 2) + 20
+
 def add_to_json_array(filename, new_object, array_key=None, mode="overwrite"):
     if mode != "overwrite":
         try:
@@ -698,7 +785,7 @@ def add_to_json_array(filename, new_object, array_key=None, mode="overwrite"):
             data[array_key].append(new_object)
         else:
             # JSON structure: [...]
-            data.append(new_object)
+            data.extend(new_object)
     
     with open(filename, 'w') as f:
         json.dump(new_object, f, indent=4)
