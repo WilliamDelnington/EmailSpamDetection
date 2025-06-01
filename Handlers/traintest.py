@@ -2,7 +2,7 @@ import scipy.sparse
 from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV
 from sklearn.svm import SVC
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
-from sklearn.metrics import roc_auc_score, roc_curve, auc, precision_recall_fscore_support
+from sklearn.metrics import roc_auc_score
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, HistGradientBoostingClassifier
 from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
@@ -14,9 +14,14 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.utils.validation import check_is_fitted
 from sklearn.exceptions import NotFittedError
+from sklearn.decomposition import TruncatedSVD
 from keras.src.models import Sequential
 from keras.src.layers import Dense, Conv1D, GlobalMaxPooling1D, Embedding, Dropout, LSTM, Bidirectional, SimpleRNN
 from keras.src.layers import TextVectorization
+from keras.src.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from functools import partial
+from concurrent.futures import ThreadPoolExecutor
+from abc import ABC, abstractmethod
 import matplotlib.pyplot as plt
 import numpy as np
 import traceback as trb
@@ -25,6 +30,7 @@ import scipy
 import joblib
 import json
 import math
+import os
 
 model_parameters = {
     "SVM": {
@@ -100,77 +106,209 @@ model_parameters = {
     }
 }
 
-class PreprocessAndTrainWithCNN:
-    # def __init__(self, vocab_size, embedding_size, num_filters, filter_sizes, hidden_size, output_size, dropout=0.2):
-    def __init__(self):
+class NeuralNetworkClassifier(ABC):
+    def __init__(self, data_name, model_name, max_features, input_length):
         self.model = Sequential()
+        self.epochs = 10
+        self.history = None
+        self.data_name = data_name
+        self.model_name = model_name
+        self.max_features = max_features
+        self.input_length = input_length
 
-    def load_data(self, 
-                  data, 
-                  input_features:list=None, 
-                  output_feature:str=None
-                  ):
+    def load_data(self, X, y):
         """
         Load and preprocess the data.
         Parameters:
-        - data: The input data to be processed.
-        - features: Optional, specific features to be used from the data.
+        - X: The input samples and features to be processed.
+        - y: The input label from each sample of the dataset
         """
-        # Implement if data is a DataFrame object
-        if isinstance(data, pd.DataFrame):
-            if input_features is None and output_feature is None:
-                print("The input features are not specified. The last column will be used as the output feature, while the rest will be used as input features.")
-                self.X = data.iloc[:, :-1]
-                self.y = data.iloc[:, -1]
-            elif input_features is None:
-                self.X = data[input_features]
-                self.y = data[[f for f in data.columns if f not in input_features]]
-            elif output_feature is None:
-                self.X = data.drop(columns=[output_feature])
-                self.y = data[output_feature]
-            else:
-                self.X = data[input_features]
-                self.y = data[output_feature]
-            
-            if len(self.X.columns) > 1:
-                self.X = self.X.astype(str).agg(" ".join, axis=1)
-            self.X = self.X.to_list()
-            self.y = np.array(self.y, dtype=int)
-            print(self.X)
-            print(self.y) 
+        self.X = X
+        self.y = y
 
-        elif isinstance(data, (np.ndarray, list)):
-            self.X = data[:, :-1]
-            self.y = data[:, -1]
-
-        else:
-            raise TypeError("Unsupported data type. Please provide a DataFrame, numpy array, or list.")
-        
-    def split(self, test_size=0.2, random_state=42):
+    def split(self, test_size=0.1, valid_size=0.1, random_state=42):
         """
         Split the data into training and testing sets.
         Parameters:
-        - test_size: The proportion of the dataset to include in the test split.
+        - test_size: The proportion of the dataset to include in the test part.
+        - valid_size: The proportion of the dataset to include in the validation part.
         - random_state: Controls the shuffling applied to the data before applying the split.
         """
         if not hasattr(self, 'X') or not hasattr(self, 'y'):
             raise ValueError("Data has not been loaded. Call load_data() first.")
         
-        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
             self.X, self.y, test_size=test_size, random_state=random_state
         )
 
-        self.x_train = np.array(self.x_train, dtype=object)
-        self.x_test = np.array(self.x_test, dtype=object)
+        if valid_size > 0:
+            val_ratio = valid_size / (1 - test_size)
 
-    def preprocess(self, max_features=10000, sequence_length=100):
+            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(
+                self.X_train, self.y_train, test_size=val_ratio, random_state=random_state
+            )
+
+    def reduce_dim(self, input, num_features=100):
+        try:
+            l = self.X.shape
+            print(l)
+        except Exception as e:
+            print(f"An error when getting the shape: {trb.print_exc()}")
+            l = len(self.X[0])
+        svd = TruncatedSVD(n_components=num_features)
+        self.X_train = svd.fit_transform(input)
+        
+    def vectorizing(self, data_input, print_shape=True, sequence_length=100):
         self.vectorizer = TextVectorization(
-            max_tokens=max_features, 
-            output_mode='int', 
+            max_tokens=self.max_features,
+            output_mode="int",
             output_sequence_length=sequence_length
         )
-        self.vectorizer.adapt(self.x_train)
 
+        self.vectorizer.adapt(self.X_train)
+
+        vectorized = self.vectorizer(data_input)
+        
+        if print_shape:
+            print(f"Shape of the input data is {vectorized.shape}")
+        
+        return vectorized
+    
+    def get_callbacks(
+        self,
+        callback_methods=["early-stop"],
+        early_stopping_monitor="val_accuracy",
+        epoch_limitation=5,
+        min_delta=0.001,
+        save_path="./best_model.h5"
+    ):
+        self.callbacks = []
+        for method in callback_methods:
+            if method.lower() in [
+                "earlystopping", 
+                "earlystop", 
+                "early stop", 
+                "early stopping"
+            ]:
+                early_stopping = EarlyStopping(
+                    monitor=early_stopping_monitor,
+                    patience=epoch_limitation,
+                    min_delta=min_delta,
+                    mode="max",
+                    verbose=1,
+                    restore_best_weights=True
+                )
+
+                self.callbacks.append(early_stopping)
+
+            elif method.lower() in [
+                "model checkpoint", 
+                "modelcheckpoint"
+            ]:
+                model_checkpoint = ModelCheckpoint(
+                    save_path,
+                    monitor=early_stopping_monitor,
+                    save_best_only=True,
+                    mode="max",
+                    verbose=1
+                )
+
+                self.callbacks.append(model_checkpoint)
+
+            elif method.lower() in [
+                "reducelr", 
+                "reduce learning rate", 
+                "reducelearningrate",
+                "reducelronplateau",
+                "reduce learning rate on plateau"
+            ]:
+                reducelr = ReduceLROnPlateau(
+                    monitor=early_stopping_monitor,
+                    factor=0.5,
+                    patience=epoch_limitation-2,
+                    min_lr=1e-6,
+                    verbose=1
+                )
+
+                self.callbacks.append(reducelr)
+
+            else:
+                raise ValueError("""
+                    Unknown callback method. The available methods are
+                    EarlyStopping, ModelCheckpoint and ReduceLROnPlateau""")
+
+    @abstractmethod
+    def build(self):
+        pass
+
+    def plot_training_validation_accuracy(
+            self,
+            figsize=(10, 6),
+            plot_xlabel="Epochs",
+            plot_ylabel="Accuracy",
+            save_plot=True,
+            parent_folder="./fig/"):
+        if self.history is None:
+            raise ValueError("Model is not trained. Call build() method before plotting.")
+        accuracy = self.history.history["accuracy"]
+        plt.figure(figsize=figsize)
+        plt.plot(
+            range(1, self.epochs + 1),
+            accuracy,
+            color="blue", 
+            linestyle="--", 
+            linewidth=2, 
+            label="Training Accuracy"
+        )
+        if hasattr(self, "X_val"):
+            val_accuracy = self.history.history["val_accuracy"]
+            plt.plot(
+                range(1, self.epochs + 1),
+                val_accuracy,
+                color="red", 
+                linestyle="--", 
+                linewidth=2, 
+                label="Validation Accuracy"
+            )
+        plt.title(f"{self.model_name} Train-Val Accuracy Results for {self.data_name}")
+        plt.xlabel(xlabel=plot_xlabel)
+        plt.ylabel(ylabel=plot_ylabel)
+        plt.grid(True, alpha=0.3)
+        if save_plot:
+            plt.savefig(os.path.join(parent_folder, f"{self.model_name}_{self.data_name}.jpg"))
+        plt.show()
+
+    def evaluate(self, detailed=True):
+        y_pred = self.model.predict_(self.X_test)
+        y_pred_classes = (y_pred > 0.5).astype(int)
+
+        self.confusion_matrix = confusion_matrix(self.y_test, y_pred_classes)
+        if detailed:
+            self.metrics = {
+                "accuracy": accuracy_score(self.y_test, y_pred_classes),
+                "weighted_precision": precision_score(self.y_test, y_pred_classes, average='weighted'),
+                "wighted_recall": recall_score(self.y_test, y_pred_classes, average='weighted'),
+                "weighted_f1": f1_score(self.y_test, y_pred_classes, average='weighted'),
+                "macro_precision": precision_score(self.y_test, y_pred_classes, average='macro'),
+                "macro_recall": recall_score(self.y_test, y_pred_classes, average='macro'),
+                "macro_f1": f1_score(self.y_test, y_pred_classes, average='macro'),
+                "roc_auc": roc_auc_score(self.y_test, y_pred_classes)
+            }
+            detailed_metrics = {
+                "dataset": self.data_name,
+                "model": self.model_name,
+                "metrics": self.metrics,
+                "confusion_matrix": self.confusion_matrix,
+                "epochs": self.epochs
+            }
+            return detailed_metrics
+
+        return classification_report(self.y_test, y_pred)
+
+class ConvolutionalNNClassifier(NeuralNetworkClassifier):
+    # def __init__(self, vocab_size, embedding_size, num_filters, filter_sizes, hidden_size, output_size, dropout=0.2):
+    def __init__(self, data_name, model_name="CNN", max_features=5000, input_length=200):
+        super().__init__(data_name, model_name, max_features, input_length)
 
     def build(self, max_features=10000, 
               embedding_size=128, 
@@ -188,7 +326,8 @@ class PreprocessAndTrainWithCNN:
     
         self.model.add(Embedding(
             input_dim=max_features, 
-            output_dim=embedding_size
+            output_dim=embedding_size,
+            input_length=self.input_length
         ))
 
         self.model.add(Conv1D(
@@ -215,87 +354,24 @@ class PreprocessAndTrainWithCNN:
             metrics=['accuracy', 'precision', 'recall']
         )
 
-        self.model.fit(
-            self.x_train, 
+        self.epochs = epochs
+
+        self.history = self.model.fit(
+            self.X_train, 
             self.y_train, 
             epochs=epochs, 
-            batch_size=batch_size, 
-            validation_data=(self.x_test, self.y_test)
+            batch_size=batch_size,
+            callbacks=(None if len(self.callbacks) == 0 else self.callbacks),
+            validation_data=(self.X_val, self.y_val)
         )
 
         self.model.save("./Classify_CNN_model.h5")
-    
-    def evaluate(self):
-        if not hasattr(self, 'x_test') or not hasattr(self, 'y_test'):
-            raise ValueError("Model has not been trained yet. Call fit() first.")
-        
-        y_pred = self.model.predict(self.x_test)
-        y_pred_classes = (y_pred > 0.5).astype(int)
 
-        report = classification_report(self.y_test, y_pred_classes)
-        print(report)
+class RecurrentNNClassifier(NeuralNetworkClassifier):
+    def __init__(self, data_name, model_name="RNN", max_features=5000, input_length=200):
+        super().__init__(data_name, model_name, max_features, input_length)
 
-
-class PreprocessAndTrainWithRNN:
-    def __init__(self):
-        self.model = Sequential()
-
-    def load_data(self, 
-                  data,
-                  input_features:list=None,
-                  output_feature:str=None
-                  ):
-        if isinstance(data, pd.DataFrame):
-            if input_features is None and output_feature is None:
-                print("The input features are not specified. The last column will be used as the output feature, while the rest will be used as input features.")
-                self.X = data.iloc[:, :-1]
-                self.y = data.iloc[:, -1]
-            elif input_features is None:
-                self.X = data[input_features]
-                self.y = data[[f for f in data.columns if f not in input_features]]
-            elif output_feature is None:
-                self.X = data.drop(columns=[output_feature])
-                self.y = data[output_feature]
-            else:
-                self.X = data[input_features]
-                self.y = data[output_feature]
-            
-            if len(self.X.columns) > 1:
-                self.X = self.X.astype(str).agg(" ".join, axis=1)
-            self.X = self.X.to_list()
-            self.y = np.array(self.y, dtype=int)
-            print(self.X)
-            print(self.y) 
-
-        elif isinstance(data, (np.ndarray, list)):
-            self.X = data[:, :-1]
-            self.y = data[:, -1]
-
-        else:
-            raise TypeError("Unsupported data type. Please provide a DataFrame, numpy array, or list.")
-        
-    def split(self,
-              test_size=0.2, 
-              random_state=42):
-        if not hasattr(self, 'X') or not hasattr(self, 'y'):
-            raise ValueError("Data has not been loaded. Call load_data() first.")
-        
-        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
-            self.X, self.y, test_size=test_size, random_state=random_state
-        )
-
-        self.x_train = np.array(self.x_train, dtype=object)
-        self.x_test = np.array(self.x_test, dtype=object)
-
-    def preprocess(self, max_features=10000, sequence_length=100):
-        self.vectorizer = TextVectorization(
-            max_tokens=max_features, 
-            output_mode='int', 
-            output_sequence_length=sequence_length
-        )
-        self.vectorizer.adapt(self.x_train)
-
-    def build(self, max_features=10000, 
+    def build(self,
               embedding_size=128, 
               units=64,
               hidden_size=128,
@@ -303,7 +379,6 @@ class PreprocessAndTrainWithRNN:
               pooling_dropout_rate=0.2,
               dense_dropout=False,
               dense_dropout_rate=0.5,
-              recurrent_method="simple",
               bidirectional=False,
               epochs=10,
               batch_size=32):
@@ -311,14 +386,13 @@ class PreprocessAndTrainWithRNN:
         self.model.add(self.vectorizer)
     
         self.model.add(Embedding(
-            input_dim=max_features, 
-            output_dim=embedding_size
+            input_dim=self.max_features, 
+            output_dim=embedding_size,
+            input_length=self.input_length
         ))
 
-        if recurrent_method == "simple":
-            layer = SimpleRNN(units, return_sequences=True)
-
-        self.model.add(GlobalMaxPooling1D())
+        if bidirectional:
+            self.model.add(Bidirectional(LSTM(embedding_size)))
 
         if pooling_dropout:
             self.model.add(Dropout(pooling_dropout_rate))
@@ -336,27 +410,20 @@ class PreprocessAndTrainWithRNN:
             metrics=['accuracy', 'precision', 'recall']
         )
 
-        self.model.fit(
+        self.epochs = epochs
+
+        self.history = self.model.fit(
             self.x_train, 
             self.y_train, 
             epochs=epochs, 
-            batch_size=batch_size, 
+            batch_size=batch_size,
+            callbacks=(None if len(self.callbacks) == 0 else self.callbacks),
             validation_data=(self.x_test, self.y_test)
         )
 
-        self.model.save("./Classify_CNN_model.h5")
-    
-    def evaluate(self):
-        if not hasattr(self, 'x_test') or not hasattr(self, 'y_test'):
-            raise ValueError("Model has not been trained yet. Call fit() first.")
-        
-        y_pred = self.model.predict(self.x_test)
-        y_pred_classes = (y_pred > 0.5).astype(int)
+        self.model.save("./Classify_RNN_model.h5")
 
-        report = classification_report(self.y_test, y_pred_classes)
-        print(report)
-
-def get_classification_models():
+def get_classification_models(X):
     return [
         SVC(),
         MultinomialNB(),
@@ -370,10 +437,11 @@ def get_classification_models():
         # HistGradientBoostingClassifier(
         #     early_stopping=True, 
         #     n_iter_no_change=6,
-        #     max_bins=199),
+        #     max_bins=199,
+        #     ),
         Perceptron(),
         PassiveAggressiveClassifier(),
-        MLPClassifier(hidden_layer_sizes=(80,), early_stopping=True)
+        MLPClassifier(hidden_layer_sizes=(150, 75), early_stopping=True)
     ]
 
 class EvaluateError(Exception):
@@ -532,9 +600,11 @@ class ClassificationModel:
 
         self.training_accuracies = []
         self.validation_accuracies = []
-        self.epochs = range(epochs)
+        self.epochs = range(1, epochs + 1)
 
         for epoch in self.epochs:
+            if epoch % 5 == 0:
+                print(f"{self.model_name} begins epoch {epoch}")
             try:
                 self.__fitting_model(self.X_train, self.y_train)
             except TypeError:
@@ -831,4 +901,88 @@ def add_to_json_array(filename, new_object, array_key=None, mode="overwrite"):
             data.extend(new_object)
     
     with open(filename, 'w') as f:
-        json.dump(new_object, f, indent=4)
+        json.dump(new_object, f, indent=4) 
+
+def train_and_evaluate_models(
+        X, 
+        y, 
+        dataset_name, 
+        metric_results:list, 
+        model=None,
+        mode="normal",
+        epochs=10,
+        n_jobs=6,
+        cv=4,
+        test_size=0.15,
+        valid_size=0.15,
+        save_plot:bool=False,
+        plot_xlabel="Epochs",
+        plot_ylabel="Accuracy",
+        threading=True,
+        max_workers=3
+    ):
+
+    def __t_and_e(
+            model,
+            X,
+            y,
+            dataset_name,
+            metric_results,
+            epochs,
+            mode,
+            n_jobs,
+            cv,
+            test_size,
+            valid_size,
+            save_plot,
+            plot_xlabel,
+            plot_ylabel
+    ):
+        print(f"Begin {model.__class__.__name__}")
+        classification_model = ClassificationModel(model, dataset_name)
+        if mode.lower() == "epochs":
+            classification_model.train_with_epochs(X, y, epochs=epochs, save_model=True, test_size=test_size, valid_size=valid_size)
+            print(f"{model.__class__.__name__} classification report")
+            classification_model.plot_train_val_accuracy_after_epochs(xlabel=plot_xlabel, ylabel=plot_ylabel, save_plot=save_plot)
+        elif mode.lower() == "best":
+            classification_model.train_with_finding_best_parameters(X, y, save_model=True, mode=mode, n_jobs=n_jobs, cv=cv)
+            classification_model.get_best_estimator(put_right_in_the_model=True)
+            print(f"{model.__class__.__name__} classification report")
+        elif mode.lower() == "normal":
+            classification_model.train(X, y)
+            print(f"{model.__class__.__name__} classification report")
+        else:
+            raise ValueError("Unknown mode. The avaiable modes are 'epochs', 'best', and 'normal'")
+        metrics = classification_model.evaluate(detailed=True)
+        metric_results.append(metrics)
+        print(metrics)
+        print("\n")
+
+    train_eval = partial(
+        __t_and_e,
+        X=X,
+        y=y,
+        dataset_name=dataset_name,
+        metric_results=metric_results,
+        mode=mode,
+        epochs=epochs,
+        n_jobs=n_jobs,
+        cv=cv,
+        test_size=test_size,
+        valid_size=valid_size,
+        save_plot=save_plot,
+        plot_xlabel=plot_xlabel,
+        plot_ylabel=plot_ylabel
+    )
+
+    if model is None:
+        models = get_classification_models(X)
+        if threading:
+            print("Threading avaiable")
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                executor.map(train_eval, models)
+        else:
+            for m in models:
+                train_eval(m)
+    else:
+        train_eval(model)
