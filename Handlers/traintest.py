@@ -433,7 +433,8 @@ class RecurrentNNClassifier(NeuralNetworkClassifier):
               bidirectional=False,
               epochs=10,
               batch_size=32,
-              callback_methods=["early stopping"]):
+              callback_methods=["early stopping"],
+              save_model=True):
         
         assert len(hidden_sizes) == hidden_layer_num, "the size of hidden_sizes parameters must match the number of hidden layer"
         
@@ -488,7 +489,8 @@ class RecurrentNNClassifier(NeuralNetworkClassifier):
 
         self.epochs = stopped_epoch + 1 if stopped_epoch != 0 else epochs
 
-        self.model.save(f"./Classify_{self.data_name}_RNN_model.h5")
+        if save_model:
+            self.model.save(f"./Classify_{self.data_name}_CNN_model.h5")
 
 class ArtificialNNClassifier(NeuralNetworkClassifier):
     def __init__(self, data_name, model_name="ANN", max_features=5000, input_length=200):
