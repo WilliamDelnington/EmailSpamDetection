@@ -1,13 +1,28 @@
 import scipy.sparse
 from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV
 from sklearn.svm import SVC
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import (
+    classification_report, 
+    confusion_matrix, 
+    accuracy_score, 
+    precision_score, 
+    recall_score, 
+    f1_score
+)
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import ConfusionMatrixDisplay
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, HistGradientBoostingClassifier
+from sklearn.ensemble import (
+    RandomForestClassifier, 
+    AdaBoostClassifier, 
+    HistGradientBoostingClassifier
+)
 from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.linear_model import LogisticRegression, SGDClassifier, Perceptron, PassiveAggressiveClassifier
+from sklearn.linear_model import (
+    LogisticRegression, 
+    SGDClassifier, 
+    Perceptron,
+    PassiveAggressiveClassifier)
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.base import BaseEstimator
 from sklearn.neural_network import MLPClassifier
@@ -16,9 +31,23 @@ from sklearn.utils.validation import check_is_fitted
 from sklearn.exceptions import NotFittedError
 from sklearn.decomposition import TruncatedSVD
 from keras.src.models import Sequential
-from keras.src.layers import Dense, Conv1D, GlobalMaxPooling1D, Embedding, Dropout, LSTM, Bidirectional, GRU, MaxPooling1D
+from keras.src.layers import (
+    Dense, 
+    Conv1D, 
+    GlobalMaxPooling1D, 
+    Embedding, 
+    Dropout, 
+    LSTM, 
+    Bidirectional, 
+    GRU, 
+    MaxPooling1D
+)
 from keras.src.layers import TextVectorization
-from keras.src.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from keras.src.callbacks import (
+    EarlyStopping, 
+    ModelCheckpoint, 
+    ReduceLROnPlateau
+)
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
 from abc import ABC, abstractmethod
@@ -355,6 +384,7 @@ class ConvolutionalNNClassifier(NeuralNetworkClassifier):
               batch_size=32,
               callback_methods=["early stopping"],
               save_model=True):
+
         assert len(filter_sizes) == conv_layer_num, "the len of filter_sizes parameters must match the number of hidden layer"
         assert len(num_filters) == conv_layer_num, "the len of num_filters parameters must match the number of hidden layer"
         
@@ -414,7 +444,7 @@ class ConvolutionalNNClassifier(NeuralNetworkClassifier):
         self.epochs = stopped_epoch + 1 if stopped_epoch != 0 else epochs
 
         if save_model:
-            self.model.save(f"./Classify_{self.data_name}_CNN_model.h5")
+            self.model.save(f"./models/Classify_{self.data_name}_CNN_model.h5")
 
 class RecurrentNNClassifier(NeuralNetworkClassifier):
     def __init__(self, data_name, model_name="RNN", max_features=5000, input_length=200):
@@ -448,15 +478,27 @@ class RecurrentNNClassifier(NeuralNetworkClassifier):
 
         for i in range(hidden_layer_num):
             if bidirectional:
-                if lstm:
-                    self.model.add(Bidirectional(LSTM(hidden_sizes[i])))
+                if i == hidden_layer_num - 1:
+                    if lstm:
+                        self.model.add(Bidirectional(LSTM(hidden_sizes[i])))
+                    else:
+                        self.model.add(Bidirectional(GRU(hidden_sizes[i])))
                 else:
-                    self.model.add(Bidirectional(GRU(hidden_sizes[i])))
+                    if lstm:
+                        self.model.add(Bidirectional(LSTM(hidden_sizes[i], return_sequences=True)))
+                    else:
+                        self.model.add(Bidirectional(GRU(hidden_sizes[i], return_sequences=True)))
             else:
-                if lstm:
-                    self.model.add(LSTM(hidden_sizes[i]))
+                if i == hidden_layer_num - 1:
+                    if lstm:
+                        self.model.add(LSTM(hidden_sizes[i]))
+                    else:
+                        self.model.add(GRU(hidden_sizes[i]))
                 else:
-                    self.model.add(GRU(hidden_sizes[i]))
+                    if lstm:
+                        self.model.add(LSTM(hidden_sizes[i], return_sequences=True))
+                    else:
+                        self.model.add(GRU(hidden_sizes[i], return_sequences=True))
 
         if pooling_dropout:
             self.model.add(Dropout(pooling_dropout_rate))
@@ -490,14 +532,59 @@ class RecurrentNNClassifier(NeuralNetworkClassifier):
         self.epochs = stopped_epoch + 1 if stopped_epoch != 0 else epochs
 
         if save_model:
-            self.model.save(f"./Classify_{self.data_name}_CNN_model.h5")
+            self.model.save(f"./models/Classify_{self.data_name}_RNN_model.h5")
 
 class ArtificialNNClassifier(NeuralNetworkClassifier):
     def __init__(self, data_name, model_name="ANN", max_features=5000, input_length=200):
         super().__init__(data_name, model_name, max_features, input_length)
 
-    def build(self):
-        return super().build()
+    def build(self,
+              hidden_layer_num=2,
+              hidden_layer_sizes=[64, 64],
+              embedding_size=64,
+              callback_methods=["early stopping"],
+              epochs=10,
+              batch_size=32,
+              save_model=True):
+        assert len(hidden_layer_sizes) == hidden_layer_num
+
+        self.model.add(self.vectorizer)
+
+        self.model.add(Embedding(
+            input_dim=self.max_features,
+            output_dim=embedding_size
+        ))
+
+        self.model.add(GlobalMaxPooling1D())
+
+        for i in range(hidden_layer_num):
+            self.model.add(Dense(hidden_layer_sizes[i], activation="relu"))
+
+        self.model.add(Dense(1, activation='sigmoid'))
+
+        self.model.compile(
+            loss='binary_crossentropy',
+            optimizer='adam',
+            metrics=['accuracy', 'precision', 'recall']
+        )
+
+        self.get_callbacks(callback_methods=callback_methods)
+
+        self.history = self.model.fit(
+            self.X_train, 
+            self.y_train, 
+            epochs=epochs, 
+            batch_size=batch_size,
+            callbacks=(None if len(self.callbacks) == 0 else self.callbacks),
+            validation_data=(self.X_val, self.y_val)
+        )
+
+        stopped_epoch = self.callbacks[0].stopped_epoch
+
+        self.epochs = stopped_epoch + 1 if stopped_epoch != 0 else epochs
+
+        if save_model:
+            self.model.save(f"./models/Classify_{self.data_name}_ANN_model.h5")
 
 def get_classification_models(X):
     return [
@@ -518,6 +605,13 @@ def get_classification_models(X):
         Perceptron(),
         PassiveAggressiveClassifier(),
         MLPClassifier(hidden_layer_sizes=(150, 75), early_stopping=True)
+    ]
+
+def get_nn_classification_models(dataset_name):
+    return [
+        ConvolutionalNNClassifier(dataset_name),
+        RecurrentNNClassifier(dataset_name),
+        ArtificialNNClassifier(dataset_name)
     ]
 
 class EvaluateError(Exception):
