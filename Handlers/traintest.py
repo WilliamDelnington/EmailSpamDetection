@@ -16,7 +16,7 @@ from sklearn.utils.validation import check_is_fitted
 from sklearn.exceptions import NotFittedError
 from sklearn.decomposition import TruncatedSVD
 from keras.src.models import Sequential
-from keras.src.layers import Dense, Conv1D, GlobalMaxPooling1D, Embedding, Dropout, LSTM, Bidirectional, SimpleRNN
+from keras.src.layers import Dense, Conv1D, GlobalMaxPooling1D, Embedding, Dropout, LSTM, Bidirectional, GRU, MaxPooling1D
 from keras.src.layers import TextVectorization
 from keras.src.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 from functools import partial
@@ -107,7 +107,11 @@ model_parameters = {
 }
 
 class NeuralNetworkClassifier(ABC):
-    def __init__(self, data_name, model_name, max_features, input_length):
+    def __init__(self, 
+                 data_name:str, 
+                 model_name:str, 
+                 max_features:int, 
+                 input_length:int):
         self.model = Sequential()
         self.epochs = 10
         self.history = None
@@ -125,6 +129,19 @@ class NeuralNetworkClassifier(ABC):
         """
         self.X = X
         self.y = y
+        if isinstance(self.X, (pd.DataFrame, pd.Series)):
+            self.X = self.X.astype(str).values
+        if isinstance(self.y, (pd.DataFrame, pd.Series)):
+            self.y = self.y.astype(np.int32).values
+
+        print(self.X)
+        print(self.y)
+        print(len(self.X))
+        print(len(self.y))
+        print(type(self.X))
+        print(type(self.y))
+        print(self.X.dtype)
+        print(self.y.dtype)
 
     def split(self, test_size=0.1, valid_size=0.1, random_state=42):
         """
@@ -158,16 +175,19 @@ class NeuralNetworkClassifier(ABC):
         svd = TruncatedSVD(n_components=num_features)
         self.X_train = svd.fit_transform(input)
         
-    def vectorizing(self, data_input, print_shape=True, sequence_length=100):
+    def vectorizing(self, data_input=None, print_shape=True):
         self.vectorizer = TextVectorization(
             max_tokens=self.max_features,
             output_mode="int",
-            output_sequence_length=sequence_length
+            output_sequence_length=self.input_length
         )
 
         self.vectorizer.adapt(self.X_train)
 
-        vectorized = self.vectorizer(data_input)
+        if data_input is None:
+            vectorized = self.vectorizer(self.X_train)
+        else:
+            vectorized = self.vectorizer(data_input)
         
         if print_shape:
             print(f"Shape of the input data is {vectorized.shape}")
@@ -182,6 +202,11 @@ class NeuralNetworkClassifier(ABC):
         min_delta=0.001,
         save_path="./best_model.h5"
     ):
+        """
+        Setup callbacks for the model whether the model stops improving.
+
+        Note that early-stopping must always come first.
+        """
         self.callbacks = []
         for method in callback_methods:
             if method.lower() in [
@@ -205,6 +230,8 @@ class NeuralNetworkClassifier(ABC):
                 "model checkpoint", 
                 "modelcheckpoint"
             ]:
+                if len(self.callbacks) == 0:
+                    raise ValueError("Early-stopping must always comes first.")
                 model_checkpoint = ModelCheckpoint(
                     save_path,
                     monitor=early_stopping_monitor,
@@ -222,6 +249,8 @@ class NeuralNetworkClassifier(ABC):
                 "reducelronplateau",
                 "reduce learning rate on plateau"
             ]:
+                if len(self.callbacks) == 0:
+                    raise ValueError("Early-stopping must always comes first.")
                 reducelr = ReduceLROnPlateau(
                     monitor=early_stopping_monitor,
                     factor=0.5,
@@ -247,7 +276,7 @@ class NeuralNetworkClassifier(ABC):
             plot_xlabel="Epochs",
             plot_ylabel="Accuracy",
             save_plot=True,
-            parent_folder="./fig/"):
+            parent_folder="./figs/"):
         if self.history is None:
             raise ValueError("Model is not trained. Call build() method before plotting.")
         accuracy = self.history.history["accuracy"]
@@ -279,7 +308,7 @@ class NeuralNetworkClassifier(ABC):
         plt.show()
 
     def evaluate(self, detailed=True):
-        y_pred = self.model.predict_(self.X_test)
+        y_pred = self.model.predict(self.X_test)
         y_pred_classes = (y_pred > 0.5).astype(int)
 
         self.confusion_matrix = confusion_matrix(self.y_test, y_pred_classes)
@@ -310,31 +339,46 @@ class ConvolutionalNNClassifier(NeuralNetworkClassifier):
     def __init__(self, data_name, model_name="CNN", max_features=5000, input_length=200):
         super().__init__(data_name, model_name, max_features, input_length)
 
-    def build(self, max_features=10000, 
+    def build(self,
               embedding_size=128, 
-              num_filters=64, 
-              filter_sizes=3, 
-              hidden_size=128,
+              num_filters=[64],
+              conv_layer_num=1,
+              filter_sizes=[5], 
+              hidden_size=64,
+              max_pooling=False,
+              pooling_sizes=[2],
               pooling_dropout=False, 
               pooling_dropout_rate=0.2,
               dense_dropout=False,
               dense_dropout_rate=0.5,
               epochs=10,
-              batch_size=32):
+              batch_size=32,
+              callback_methods=["early stopping"],
+              save_model=True):
+        assert len(filter_sizes) == conv_layer_num, "the len of filter_sizes parameters must match the number of hidden layer"
+        assert len(num_filters) == conv_layer_num, "the len of num_filters parameters must match the number of hidden layer"
         
         self.model.add(self.vectorizer)
     
         self.model.add(Embedding(
-            input_dim=max_features, 
+            input_dim=self.max_features, 
             output_dim=embedding_size,
             input_length=self.input_length
         ))
 
-        self.model.add(Conv1D(
-            filters=num_filters, 
-            kernel_size=filter_sizes, 
-            activation='relu'
-        ))
+        for i in range(conv_layer_num):
+            self.model.add(Conv1D(
+                filters=num_filters[i], 
+                kernel_size=filter_sizes[i], 
+                activation='relu'
+            ))
+
+            if max_pooling:
+                assert len(pooling_sizes) == conv_layer_num
+                assert pooling_sizes[conv_layer_num - 1] == 0
+
+                if pooling_sizes[i] != 0:
+                    self.model.add(MaxPooling1D(pooling_sizes[i]))
 
         self.model.add(GlobalMaxPooling1D())
 
@@ -354,7 +398,7 @@ class ConvolutionalNNClassifier(NeuralNetworkClassifier):
             metrics=['accuracy', 'precision', 'recall']
         )
 
-        self.epochs = epochs
+        self.get_callbacks(callback_methods=callback_methods)
 
         self.history = self.model.fit(
             self.X_train, 
@@ -365,23 +409,33 @@ class ConvolutionalNNClassifier(NeuralNetworkClassifier):
             validation_data=(self.X_val, self.y_val)
         )
 
-        self.model.save("./Classify_CNN_model.h5")
+        stopped_epoch = self.callbacks[0].stopped_epoch
+
+        self.epochs = stopped_epoch + 1 if stopped_epoch != 0 else epochs
+
+        if save_model:
+            self.model.save(f"./Classify_{self.data_name}_CNN_model.h5")
 
 class RecurrentNNClassifier(NeuralNetworkClassifier):
     def __init__(self, data_name, model_name="RNN", max_features=5000, input_length=200):
         super().__init__(data_name, model_name, max_features, input_length)
 
     def build(self,
-              embedding_size=128, 
+              embedding_size=64, 
               units=64,
-              hidden_size=128,
+              hidden_layer_num=1,
+              hidden_sizes=[128],
+              lstm=True,
               pooling_dropout=False, 
               pooling_dropout_rate=0.2,
               dense_dropout=False,
               dense_dropout_rate=0.5,
               bidirectional=False,
               epochs=10,
-              batch_size=32):
+              batch_size=32,
+              callback_methods=["early stopping"]):
+        
+        assert len(hidden_sizes) == hidden_layer_num, "the size of hidden_sizes parameters must match the number of hidden layer"
         
         self.model.add(self.vectorizer)
     
@@ -391,13 +445,22 @@ class RecurrentNNClassifier(NeuralNetworkClassifier):
             input_length=self.input_length
         ))
 
-        if bidirectional:
-            self.model.add(Bidirectional(LSTM(embedding_size)))
+        for i in range(hidden_layer_num):
+            if bidirectional:
+                if lstm:
+                    self.model.add(Bidirectional(LSTM(hidden_sizes[i])))
+                else:
+                    self.model.add(Bidirectional(GRU(hidden_sizes[i])))
+            else:
+                if lstm:
+                    self.model.add(LSTM(hidden_sizes[i]))
+                else:
+                    self.model.add(GRU(hidden_sizes[i]))
 
         if pooling_dropout:
             self.model.add(Dropout(pooling_dropout_rate))
 
-        self.model.add(Dense(hidden_size, activation='relu'))
+        self.model.add(Dense(units, activation='relu'))
 
         if dense_dropout:
             self.model.add(Dropout(dense_dropout_rate))
@@ -410,18 +473,29 @@ class RecurrentNNClassifier(NeuralNetworkClassifier):
             metrics=['accuracy', 'precision', 'recall']
         )
 
-        self.epochs = epochs
+        self.get_callbacks(callback_methods=callback_methods)
 
         self.history = self.model.fit(
-            self.x_train, 
+            self.X_train, 
             self.y_train, 
             epochs=epochs, 
             batch_size=batch_size,
             callbacks=(None if len(self.callbacks) == 0 else self.callbacks),
-            validation_data=(self.x_test, self.y_test)
+            validation_data=(self.X_val, self.y_val)
         )
 
-        self.model.save("./Classify_RNN_model.h5")
+        stopped_epoch = self.callbacks[0].stopped_epoch
+
+        self.epochs = stopped_epoch + 1 if stopped_epoch != 0 else epochs
+
+        self.model.save(f"./Classify_{self.data_name}_RNN_model.h5")
+
+class ArtificialNNClassifier(NeuralNetworkClassifier):
+    def __init__(self, data_name, model_name="ANN", max_features=5000, input_length=200):
+        super().__init__(data_name, model_name, max_features, input_length)
+
+    def build(self):
+        return super().build()
 
 def get_classification_models(X):
     return [
