@@ -48,6 +48,13 @@ from keras.src.callbacks import (
     ModelCheckpoint, 
     ReduceLROnPlateau
 )
+from transformers import (
+    AutoTokenizer, 
+    AutoModelForSequenceClassification,
+    TrainingArguments,
+    Trainer
+)
+from datasets import load_dataset, DatasetDict, Dataset
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
 from abc import ABC, abstractmethod
@@ -372,7 +379,7 @@ class ConvolutionalNNClassifier(NeuralNetworkClassifier):
               embedding_size=128, 
               num_filters=[64],
               conv_layer_num=1,
-              filter_sizes=[5], 
+              kernel_sizes=[5], 
               hidden_size=64,
               max_pooling=False,
               pooling_sizes=[2],
@@ -385,7 +392,7 @@ class ConvolutionalNNClassifier(NeuralNetworkClassifier):
               callback_methods=["early stopping"],
               save_model=True):
 
-        assert len(filter_sizes) == conv_layer_num, "the len of filter_sizes parameters must match the number of hidden layer"
+        assert len(kernel_sizes) == conv_layer_num, "the len of filter_sizes parameters must match the number of hidden layer"
         assert len(num_filters) == conv_layer_num, "the len of num_filters parameters must match the number of hidden layer"
         
         self.model.add(self.vectorizer)
@@ -399,7 +406,7 @@ class ConvolutionalNNClassifier(NeuralNetworkClassifier):
         for i in range(conv_layer_num):
             self.model.add(Conv1D(
                 filters=num_filters[i], 
-                kernel_size=filter_sizes[i], 
+                kernel_size=kernel_sizes[i], 
                 activation='relu'
             ))
 
@@ -1052,6 +1059,36 @@ class ClassificationModel:
             return 45
         else:
             return int(total_combinations / 2) + 20
+
+class TransformerClassificationModel:
+    def __init__(self, data_input, model_checkpoint):
+        self.model_checkpoint = model_checkpoint
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_checkpoint)
+        if isinstance(data_input, list):
+            self.dataset = Dataset.from_list(data_input)
+        elif isinstance(data_input, dict):
+            self.dataset = Dataset.from_dict(data_input)
+        elif isinstance(data_input, pd.DataFrame):
+            self.dataset = Dataset.from_pandas(data_input)
+        elif isinstance(data_input, str):
+            file_extension = os.path.splitext(data_input)[1]
+            if file_extension == ".csv":
+                self.dataset = Dataset.from_csv(data_input)
+            elif file_extension == ".sql":
+                self.dataset = Dataset.from_sql(data_input)
+            else:
+                raise ValueError("The string input must refer to the file path.")
+            
+    def set_label_encoder_decoder(self):
+        self.__id2label = None
+        self.__label2id = None
+            
+    def set_model(self):
+        self.model = AutoModelForSequenceClassification.from_pretrained(
+            self.model_checkpoint,
+            id2label=self.__id2label,
+            label2id=self.__label2id
+        )
 
 def add_to_json_array(filename, new_object, array_key=None, mode="overwrite"):
     if mode != "overwrite":

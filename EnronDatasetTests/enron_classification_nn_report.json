@@ -1,0 +1,452 @@
+[
+    {
+        "dataset": "enron1",
+        "model": "CNN",
+        "metrics": {
+            "accuracy": 0.9864864864864865,
+            "weighted_precision": 0.9865214653825525,
+            "wighted_recall": 0.9864864864864865,
+            "weighted_f1": 0.9864995680645459,
+            "macro_precision": 0.9827437446074202,
+            "macro_recall": 0.9846166338849089,
+            "macro_f1": 0.9836739472037245,
+            "roc_auc": 0.9846166338849089
+        },
+        "confusion_matrix": [
+            [
+                363,
+                4
+            ],
+            [
+                3,
+                148
+            ]
+        ],
+        "epochs": 7
+    },
+    {
+        "dataset": "enron1",
+        "model": "RNN",
+        "metrics": {
+            "accuracy": 0.9864864864864865,
+            "weighted_precision": 0.9864688601645123,
+            "wighted_recall": 0.9864864864864865,
+            "weighted_f1": 0.9864732316559559,
+            "macro_precision": 0.9845652173913043,
+            "macro_recall": 0.9826677734269267,
+            "macro_f1": 0.983610188261351,
+            "roc_auc": 0.9826677734269267
+        },
+        "confusion_matrix": [
+            [
+                364,
+                3
+            ],
+            [
+                4,
+                147
+            ]
+        ],
+        "epochs": 12
+    },
+    {
+        "dataset": "enron1",
+        "model": "ANN",
+        "metrics": {
+            "accuracy": 0.9903474903474904,
+            "weighted_precision": 0.9903750431683995,
+            "wighted_recall": 0.9903474903474904,
+            "weighted_f1": 0.9903568343318186,
+            "macro_precision": 0.98739933851021,
+            "macro_recall": 0.9892902899832181,
+            "macro_f1": 0.9883385337169461,
+            "roc_auc": 0.9892902899832181
+        },
+        "confusion_matrix": [
+            [
+                364,
+                3
+            ],
+            [
+                2,
+                149
+            ]
+        ],
+        "epochs": 11
+    },
+    {
+        "dataset": "enron2",
+        "model": "CNN",
+        "metrics": {
+            "accuracy": 0.984641638225256,
+            "weighted_precision": 0.98481264573968,
+            "wighted_recall": 0.984641638225256,
+            "weighted_f1": 0.9846934630124904,
+            "macro_precision": 0.9764332775329043,
+            "macro_recall": 0.9829078455790785,
+            "macro_f1": 0.9796146338635178,
+            "roc_auc": 0.9829078455790785
+        },
+        "confusion_matrix": [
+            [
+                434,
+                6
+            ],
+            [
+                3,
+                143
+            ]
+        ],
+        "epochs": 11
+    },
+    {
+        "dataset": "enron2",
+        "model": "RNN",
+        "metrics": {
+            "accuracy": 0.9829351535836177,
+            "weighted_precision": 0.9829351535836177,
+            "wighted_recall": 0.9829351535836177,
+            "weighted_f1": 0.9829351535836177,
+            "macro_precision": 0.9771948941469489,
+            "macro_recall": 0.9771948941469489,
+            "macro_f1": 0.9771948941469489,
+            "roc_auc": 0.977194894146949
+        },
+        "confusion_matrix": [
+            [
+                435,
+                5
+            ],
+            [
+                5,
+                141
+            ]
+        ],
+        "epochs": 12
+    },
+    {
+        "dataset": "enron2",
+        "model": "ANN",
+        "metrics": {
+            "accuracy": 0.9914675767918089,
+            "weighted_precision": 0.9914946285914834,
+            "wighted_recall": 0.9914675767918089,
+            "weighted_f1": 0.991477283757916,
+            "macro_precision": 0.9875180140393287,
+            "macro_recall": 0.9897415940224159,
+            "macro_f1": 0.9886234357224117,
+            "roc_auc": 0.9897415940224159
+        },
+        "confusion_matrix": [
+            [
+                437,
+                3
+            ],
+            [
+                2,
+                144
+            ]
+        ],
+        "epochs": 9
+    },
+    {
+        "dataset": "enron3",
+        "model": "CNN",
+        "metrics": {
+            "accuracy": 0.9891304347826086,
+            "weighted_precision": 0.9893312974708324,
+            "wighted_recall": 0.9891304347826086,
+            "weighted_f1": 0.9891691769047581,
+            "macro_precision": 0.9835564951844022,
+            "macro_recall": 0.9905005480453051,
+            "macro_f1": 0.9869415048811645,
+            "roc_auc": 0.9905005480453051
+        },
+        "confusion_matrix": [
+            [
+                386,
+                5
+            ],
+            [
+                1,
+                160
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "enron3",
+        "model": "RNN",
+        "metrics": {
+            "accuracy": 0.9818840579710145,
+            "weighted_precision": 0.9818840579710145,
+            "wighted_recall": 0.9818840579710145,
+            "weighted_f1": 0.9818840579710145,
+            "macro_precision": 0.9780781877968578,
+            "macro_recall": 0.9780781877968578,
+            "macro_f1": 0.9780781877968578,
+            "roc_auc": 0.978078187796858
+        },
+        "confusion_matrix": [
+            [
+                386,
+                5
+            ],
+            [
+                5,
+                156
+            ]
+        ],
+        "epochs": 12
+    },
+    {
+        "dataset": "enron3",
+        "model": "ANN",
+        "metrics": {
+            "accuracy": 0.9873188405797102,
+            "weighted_precision": 0.9873033588435373,
+            "wighted_recall": 0.9873188405797102,
+            "weighted_f1": 0.9873071857978937,
+            "macro_precision": 0.9855229591836734,
+            "macro_recall": 0.9837413226160029,
+            "macro_f1": 0.9846265859801149,
+            "roc_auc": 0.9837413226160029
+        },
+        "confusion_matrix": [
+            [
+                388,
+                3
+            ],
+            [
+                4,
+                157
+            ]
+        ],
+        "epochs": 9
+    },
+    {
+        "dataset": "enron4",
+        "model": "CNN",
+        "metrics": {
+            "accuracy": 0.99,
+            "weighted_precision": 0.9899869517941283,
+            "wighted_recall": 0.99,
+            "weighted_f1": 0.9899792099792099,
+            "macro_precision": 0.9890540050743022,
+            "macro_recall": 0.9850038101537002,
+            "macro_f1": 0.9870062370062369,
+            "roc_auc": 0.9850038101537002
+        },
+        "confusion_matrix": [
+            [
+                153,
+                4
+            ],
+            [
+                2,
+                441
+            ]
+        ],
+        "epochs": 9
+    },
+    {
+        "dataset": "enron4",
+        "model": "RNN",
+        "metrics": {
+            "accuracy": 0.9866666666666667,
+            "weighted_precision": 0.9867563435055581,
+            "wighted_recall": 0.9866666666666667,
+            "weighted_f1": 0.986581639586124,
+            "macro_precision": 0.9888936414991372,
+            "macro_recall": 0.9765783381978692,
+            "macro_f1": 0.9825286820802517,
+            "roc_auc": 0.9765783381978692
+        },
+        "confusion_matrix": [
+            [
+                150,
+                7
+            ],
+            [
+                1,
+                442
+            ]
+        ],
+        "epochs": 16
+    },
+    {
+        "dataset": "enron4",
+        "model": "ANN",
+        "metrics": {
+            "accuracy": 0.9866666666666667,
+            "weighted_precision": 0.9866396037211549,
+            "wighted_recall": 0.9866666666666667,
+            "weighted_f1": 0.9866389466389467,
+            "macro_precision": 0.9847046031170714,
+            "macro_recall": 0.9806904286063465,
+            "macro_f1": 0.9826749826749825,
+            "roc_auc": 0.9806904286063464
+        },
+        "confusion_matrix": [
+            [
+                152,
+                5
+            ],
+            [
+                3,
+                440
+            ]
+        ],
+        "epochs": 8
+    },
+    {
+        "dataset": "enron5",
+        "model": "CNN",
+        "metrics": {
+            "accuracy": 0.9884169884169884,
+            "weighted_precision": 0.9884169884169884,
+            "wighted_recall": 0.9884169884169884,
+            "weighted_f1": 0.9884169884169884,
+            "macro_precision": 0.9859239130434783,
+            "macro_recall": 0.9859239130434783,
+            "macro_f1": 0.9859239130434783,
+            "roc_auc": 0.9859239130434783
+        },
+        "confusion_matrix": [
+            [
+                147,
+                3
+            ],
+            [
+                3,
+                365
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "enron5",
+        "model": "RNN",
+        "metrics": {
+            "accuracy": 0.9884169884169884,
+            "weighted_precision": 0.9884169884169884,
+            "wighted_recall": 0.9884169884169884,
+            "weighted_f1": 0.9884169884169884,
+            "macro_precision": 0.9859239130434783,
+            "macro_recall": 0.9859239130434783,
+            "macro_f1": 0.9859239130434783,
+            "roc_auc": 0.9859239130434783
+        },
+        "confusion_matrix": [
+            [
+                147,
+                3
+            ],
+            [
+                3,
+                365
+            ]
+        ],
+        "epochs": 11
+    },
+    {
+        "dataset": "enron5",
+        "model": "ANN",
+        "metrics": {
+            "accuracy": 0.9942084942084942,
+            "weighted_precision": 0.9942060012447964,
+            "wighted_recall": 0.9942084942084942,
+            "weighted_f1": 0.9942027385246074,
+            "macro_precision": 0.9939342682017425,
+            "macro_recall": 0.9919746376811595,
+            "macro_f1": 0.9929479994372921,
+            "roc_auc": 0.9919746376811595
+        },
+        "confusion_matrix": [
+            [
+                148,
+                2
+            ],
+            [
+                1,
+                367
+            ]
+        ],
+        "epochs": 9
+    },
+    {
+        "dataset": "enron6",
+        "model": "CNN",
+        "metrics": {
+            "accuracy": 0.98,
+            "weighted_precision": 0.9800202942668697,
+            "wighted_recall": 0.98,
+            "weighted_f1": 0.9798871473354231,
+            "macro_precision": 0.980466768138001,
+            "macro_recall": 0.9697420634920635,
+            "macro_f1": 0.974921630094044,
+            "roc_auc": 0.9697420634920634
+        },
+        "confusion_matrix": [
+            [
+                159,
+                9
+            ],
+            [
+                3,
+                429
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "enron6",
+        "model": "RNN",
+        "metrics": {
+            "accuracy": 0.9666666666666667,
+            "weighted_precision": 0.9665909090909092,
+            "wighted_recall": 0.9666666666666667,
+            "weighted_f1": 0.9664130678004028,
+            "macro_precision": 0.9653409090909091,
+            "macro_recall": 0.9513888888888888,
+            "macro_f1": 0.9580443052136943,
+            "roc_auc": 0.9513888888888888
+        },
+        "confusion_matrix": [
+            [
+                154,
+                14
+            ],
+            [
+                6,
+                426
+            ]
+        ],
+        "epochs": 12
+    },
+    {
+        "dataset": "enron6",
+        "model": "ANN",
+        "metrics": {
+            "accuracy": 0.9816666666666667,
+            "weighted_precision": 0.9816398611552876,
+            "wighted_recall": 0.9816666666666667,
+            "weighted_f1": 0.9816499007850918,
+            "macro_precision": 0.9781015336532477,
+            "macro_recall": 0.9763558201058201,
+            "macro_f1": 0.9772237080493487,
+            "roc_auc": 0.9763558201058201
+        },
+        "confusion_matrix": [
+            [
+                162,
+                6
+            ],
+            [
+                5,
+                427
+            ]
+        ],
+        "epochs": 7
+    }
+]
