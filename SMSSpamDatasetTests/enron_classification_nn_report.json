@@ -1,0 +1,77 @@
+[
+    {
+        "dataset": "SMSSpam",
+        "model": "CNN",
+        "metrics": {
+            "accuracy": 0.9802867383512545,
+            "weighted_precision": 0.9800377140103355,
+            "wighted_recall": 0.9802867383512545,
+            "weighted_f1": 0.979987759260237,
+            "macro_precision": 0.9697779111644658,
+            "macro_recall": 0.9421126959469002,
+            "macro_f1": 0.9553518821603928,
+            "roc_auc": 0.9421126959469003
+        },
+        "confusion_matrix": [
+            [
+                482,
+                3
+            ],
+            [
+                8,
+                65
+            ]
+        ],
+        "epochs": 9
+    },
+    {
+        "dataset": "SMSSpam",
+        "model": "RNN",
+        "metrics": {
+            "accuracy": 0.8691756272401434,
+            "weighted_precision": 0.7554662709882967,
+            "wighted_recall": 0.8691756272401434,
+            "weighted_f1": 0.8083416667525782,
+            "macro_precision": 0.4345878136200717,
+            "macro_recall": 0.5,
+            "macro_f1": 0.4650047938638543,
+            "roc_auc": 0.5
+        },
+        "confusion_matrix": [
+            [
+                485,
+                0
+            ],
+            [
+                73,
+                0
+            ]
+        ],
+        "epochs": 8
+    },
+    {
+        "dataset": "SMSSpam",
+        "model": "ANN",
+        "metrics": {
+            "accuracy": 0.9802867383512545,
+            "weighted_precision": 0.9807239276216903,
+            "wighted_recall": 0.9802867383512545,
+            "weighted_f1": 0.9795941283429365,
+            "macro_precision": 0.9889112903225806,
+            "macro_recall": 0.9246575342465753,
+            "macro_f1": 0.9536527353041114,
+            "roc_auc": 0.9246575342465753
+        },
+        "confusion_matrix": [
+            [
+                485,
+                0
+            ],
+            [
+                11,
+                62
+            ]
+        ],
+        "epochs": 9
+    }
+]

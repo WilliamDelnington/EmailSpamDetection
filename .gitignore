@@ -21,3 +21,5 @@ SpamAssassinDatasetTests/models
 SpamAssassinDatasetTests/figs
 LingspamDatasetTests/models
 LingspamDatasetTests/figs
+SMSSpamDatasetTests/figs
+SMSSpamDatasetTests/models

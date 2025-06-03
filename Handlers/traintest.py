@@ -170,15 +170,6 @@ class NeuralNetworkClassifier(ABC):
         if isinstance(self.y, (pd.DataFrame, pd.Series)):
             self.y = self.y.astype(np.int32).values
 
-        print(self.X)
-        print(self.y)
-        print(len(self.X))
-        print(len(self.y))
-        print(type(self.X))
-        print(type(self.y))
-        print(self.X.dtype)
-        print(self.y.dtype)
-
     def split(self, test_size=0.1, valid_size=0.1, random_state=42):
         """
         Split the data into training and testing sets.
@@ -290,7 +281,7 @@ class NeuralNetworkClassifier(ABC):
                 reducelr = ReduceLROnPlateau(
                     monitor=early_stopping_monitor,
                     factor=0.5,
-                    patience=epoch_limitation-2,
+                    patience=epoch_limitation-3,
                     min_lr=1e-6,
                     verbose=1
                 )
@@ -390,6 +381,7 @@ class ConvolutionalNNClassifier(NeuralNetworkClassifier):
               epochs=10,
               batch_size=32,
               callback_methods=["early stopping"],
+              epoch_limitation=7,
               save_model=True):
 
         assert len(kernel_sizes) == conv_layer_num, "the len of filter_sizes parameters must match the number of hidden layer"
@@ -435,7 +427,10 @@ class ConvolutionalNNClassifier(NeuralNetworkClassifier):
             metrics=['accuracy', 'precision', 'recall']
         )
 
-        self.get_callbacks(callback_methods=callback_methods)
+        self.get_callbacks(
+            callback_methods=callback_methods,
+            epoch_limitation=epoch_limitation
+        )
 
         self.history = self.model.fit(
             self.X_train, 
@@ -470,6 +465,7 @@ class RecurrentNNClassifier(NeuralNetworkClassifier):
               bidirectional=False,
               epochs=10,
               batch_size=32,
+              epoch_limitation=7,
               callback_methods=["early stopping"],
               save_model=True):
         
@@ -523,7 +519,10 @@ class RecurrentNNClassifier(NeuralNetworkClassifier):
             metrics=['accuracy', 'precision', 'recall']
         )
 
-        self.get_callbacks(callback_methods=callback_methods)
+        self.get_callbacks(
+            callback_methods=callback_methods,
+            epoch_limitation=epoch_limitation
+        )
 
         self.history = self.model.fit(
             self.X_train, 
@@ -552,6 +551,7 @@ class ArtificialNNClassifier(NeuralNetworkClassifier):
               callback_methods=["early stopping"],
               epochs=10,
               batch_size=32,
+              epoch_limitation=7,
               save_model=True):
         assert len(hidden_layer_sizes) == hidden_layer_num
 
@@ -575,7 +575,10 @@ class ArtificialNNClassifier(NeuralNetworkClassifier):
             metrics=['accuracy', 'precision', 'recall']
         )
 
-        self.get_callbacks(callback_methods=callback_methods)
+        self.get_callbacks(
+            callback_methods=callback_methods,
+            epoch_limitation=epoch_limitation
+        )
 
         self.history = self.model.fit(
             self.X_train, 
@@ -1089,6 +1092,44 @@ class TransformerClassificationModel:
             id2label=self.__id2label,
             label2id=self.__label2id
         )
+
+    def train_test_val_split(self, test_size, valid_size=0, random_state=42):
+        train_temp = self.dataset.train_test_split(test_size + valid_size, seed=random_state)
+        self.__train_set = train_temp["train"]
+
+        if valid_size != 0 and valid_size < 1:
+            val_ratio = valid_size / (test_size + valid_size)
+
+            test_temp = train_temp["test"].train_test_split(val_ratio)
+            self.__validation_set = test_temp["train"]
+            self.__test_set = test_temp["test"]
+
+        self.dataset = DatasetDict({
+            "train": self.__train_set,
+            "validation": self.__validation_set,
+            "test": self.__test_set
+        })
+
+    def tokenizing(self, features):
+        preprocess_func = partial(
+            self.__preprocess_function,
+            features=features
+        )
+
+        self.tokenized_dataset = self.dataset.map(preprocess_func, batched=True)
+
+    def train(self,
+              save_model=False):
+        self.model = AutoModelForSequenceClassification.from_pretrained(
+            self.model_checkpoint, num_labels = 2
+        )
+
+        self.training_args = TrainingArguments(
+            
+        )
+
+    def __preprocess_function(self, examples, features):
+        return self.tokenizer(examples[features], truncation=True, padding=True)
 
 def add_to_json_array(filename, new_object, array_key=None, mode="overwrite"):
     if mode != "overwrite":

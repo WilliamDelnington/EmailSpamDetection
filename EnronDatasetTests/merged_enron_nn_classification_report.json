@@ -1,0 +1,77 @@
+[
+    {
+        "dataset": "merged_enron",
+        "model": "CNN",
+        "metrics": {
+            "accuracy": 0.986061684460261,
+            "weighted_precision": 0.9860627531263619,
+            "wighted_recall": 0.986061684460261,
+            "weighted_f1": 0.9860614379683282,
+            "macro_precision": 0.9860741522314403,
+            "macro_recall": 0.9860397695360174,
+            "macro_f1": 0.9860561794737677,
+            "roc_auc": 0.9860397695360174
+        },
+        "confusion_matrix": [
+            [
+                1629,
+                25
+            ],
+            [
+                22,
+                1696
+            ]
+        ],
+        "epochs": 8
+    },
+    {
+        "dataset": "merged_enron",
+        "model": "RNN",
+        "metrics": {
+            "accuracy": 0.9872479240806643,
+            "weighted_precision": 0.9872670980050194,
+            "wighted_recall": 0.9872479240806643,
+            "weighted_f1": 0.9872469983714052,
+            "macro_precision": 0.9873228766940527,
+            "macro_recall": 0.9871813911454645,
+            "macro_f1": 0.9872416124266252,
+            "roc_auc": 0.9871813911454645
+        },
+        "confusion_matrix": [
+            [
+                1627,
+                27
+            ],
+            [
+                16,
+                1702
+            ]
+        ],
+        "epochs": 20
+    },
+    {
+        "dataset": "SpamAssassin",
+        "model": "ANN",
+        "metrics": {
+            "accuracy": 0.9937722419928826,
+            "weighted_precision": 0.9937762359943364,
+            "wighted_recall": 0.9937722419928826,
+            "weighted_f1": 0.9937720529511983,
+            "macro_precision": 0.993801797603641,
+            "macro_recall": 0.993741844303083,
+            "macro_f1": 0.9937696332176422,
+            "roc_auc": 0.993741844303083
+        },
+        "confusion_matrix": [
+            [
+                1641,
+                13
+            ],
+            [
+                8,
+                1710
+            ]
+        ],
+        "epochs": 11
+    }
+]
