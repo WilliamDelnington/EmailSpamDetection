@@ -1082,9 +1082,10 @@ class TransformerClassificationModel:
             else:
                 raise ValueError("The string input must refer to the file path.")
             
-    def set_label_encoder_decoder(self):
-        self.__id2label = None
-        self.__label2id = None
+    def __set_label_encoder_decoder(self, features):
+        features = sorted(set(features))
+        self.__label2id = {label: i for i, label in enumerate(features)}
+        self.__id2label = {i: label for label, i in self.__label2id.items()}
             
     def set_model(self):
         self.model = AutoModelForSequenceClassification.from_pretrained(
@@ -1094,21 +1095,34 @@ class TransformerClassificationModel:
         )
 
     def train_test_val_split(self, test_size, valid_size=0, random_state=42):
+        if (valid_size < 0 or test_size < 0):
+            raise ValueError("Ratio must not be a negative number.")
+        if (test_size + valid_size) >= 1:
+            raise ValueError("Total ratio of testing and validation set must not larger or equal to 1.")
+
         train_temp = self.dataset.train_test_split(test_size + valid_size, seed=random_state)
         self.__train_set = train_temp["train"]
 
-        if valid_size != 0 and valid_size < 1:
+        if valid_size != 0:
             val_ratio = valid_size / (test_size + valid_size)
 
             test_temp = train_temp["test"].train_test_split(val_ratio)
             self.__validation_set = test_temp["train"]
             self.__test_set = test_temp["test"]
 
-        self.dataset = DatasetDict({
-            "train": self.__train_set,
-            "validation": self.__validation_set,
-            "test": self.__test_set
-        })
+            self.dataset = DatasetDict({
+                "train": self.__train_set,
+                "validation": self.__validation_set,
+                "test": self.__test_set
+            })
+
+        else:
+            self.__test_set = train_temp["test"]
+
+            self.dataset = DatasetDict({
+                "train": self.__train_set,
+                "test": self.__test_set
+            })
 
     def tokenizing(self, features):
         preprocess_func = partial(
@@ -1119,17 +1133,83 @@ class TransformerClassificationModel:
         self.tokenized_dataset = self.dataset.map(preprocess_func, batched=True)
 
     def train(self,
-              save_model=False):
+              save_path,
+              batch_size=16,
+              epochs=20,
+              metric_monitor="accuracy"):
         self.model = AutoModelForSequenceClassification.from_pretrained(
             self.model_checkpoint, num_labels = 2
         )
 
-        self.training_args = TrainingArguments(
-            
+        self.__training_args = TrainingArguments(
+            output_dir=save_path,
+            per_device_train_batch_size=batch_size,
+            per_device_eval_batch_size=batch_size,
+            num_train_epochs=epochs,
+            learning_rate=2e-5,
+            load_best_model_at_end=True,
+            metric_for_best_model=metric_monitor,
+            save_strategy="epoch",
+            evaluation_strategy="epoch",
+            logging_strategy="epoch",
+            weight_decay=0.01
         )
+
+        self.trainer = Trainer(
+            model=self.model,
+            args=self.__training_args,
+            train_dataset=self.tokenized_dataset["train"],
+            eval_dataset=self.tokenized_dataset["validation"],
+            compute_metrics=self.__compute_metrics
+        )
+
+        self.trainer.train()
+
+    def plot_training_validation_loss(self, xlabel="Epoch", ylabel="Loss"):
+        log_history = self.trainer.state.log_history
+
+        train_losses = []
+        val_losses = []
+        epochs = []
+
+        for log in log_history:
+            if "loss" in log and "epoch" in log:
+                train_losses.append(log["loss"])
+                epochs.append(log["epoch"])
+            if "eval_loss" in log and "epoch" in log:
+                val_losses.append(log["eval_loss"])
+
+        plt.plot(epochs[:len(train_losses)], train_losses, label='Train Loss')
+        plt.plot(epochs[:len(val_losses)], val_losses, label='Validation Loss')
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.title(f'Training and Validation Loss of {self.model_checkpoint}')
+        plt.legend()
+        plt.show()
+
+    def evaluate(self):
+        test_pred = self.trainer.predict(self.tokenized_dataset["test"])
+
+        metrics = self.__compute_metrics(test_pred)
+
+        return metrics
 
     def __preprocess_function(self, examples, features):
         return self.tokenizer(examples[features], truncation=True, padding=True)
+    
+    def __compute_metrics(self, pred):
+        logits, labels = pred
+        preds = np.argmax(logits, axis=1)
+        return {
+            "accuracy": accuracy_score(labels, preds),
+            "weighted_precision": precision_score(labels, preds, average='weighted'),
+            "wighted_recall": recall_score(labels, preds, average='weighted'),
+            "weighted_f1": f1_score(labels, preds, average='weighted'),
+            "macro_precision": precision_score(labels, preds, average='macro'),
+            "macro_recall": recall_score(labels, preds, average='macro'),
+            "macro_f1": f1_score(labels, preds, average='macro'),
+            "roc_auc": roc_auc_score(labels, preds)
+        }
 
 def add_to_json_array(filename, new_object, array_key=None, mode="overwrite"):
     if mode != "overwrite":
