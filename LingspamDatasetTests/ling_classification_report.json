@@ -105,7 +105,7 @@
     },
     {
         "dataset": "ling_stemmed_countvec",
-        "model": "Logistic Regression",
+        "model": "AdaBoost",
         "type": "normal",
         "metrics": {
             "accuracy": 0.9965034965034965,
@@ -131,7 +131,7 @@
     },
     {
         "dataset": "ling_stemmed_countvec",
-        "model": "AdaBoost",
+        "model": "Logistic Regression",
         "type": "normal",
         "metrics": {
             "accuracy": 0.9965034965034965,
@@ -160,23 +160,23 @@
         "model": "Stochastic Gradient Descent",
         "type": "normal",
         "metrics": {
-            "accuracy": 0.993006993006993,
-            "weighted_precision": 0.9933248569612207,
-            "wighted_recall": 0.993006993006993,
-            "weighted_f1": 0.9930739181385176,
-            "macro_precision": 0.9772727272727273,
-            "macro_recall": 0.9959016393442623,
-            "macro_f1": 0.9863144798545316,
-            "roc_auc": 0.9959016393442622
+            "accuracy": 0.9895104895104895,
+            "weighted_precision": 0.9894537518230898,
+            "wighted_recall": 0.9895104895104895,
+            "weighted_f1": 0.9894580251591117,
+            "macro_precision": 0.9837232453957192,
+            "macro_recall": 0.9741412958626073,
+            "macro_f1": 0.9788602261807968,
+            "roc_auc": 0.9741412958626073
         },
         "confusion_matrix": [
             [
-                242,
-                2
+                243,
+                1
             ],
             [
-                0,
-                42
+                2,
+                40
             ]
         ],
         "epochs": 10
@@ -281,6 +281,58 @@
             [
                 10,
                 32
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "ling_stemmed_countvec",
+        "model": "XGBoost Classifier",
+        "type": "normal",
+        "metrics": {
+            "accuracy": 1.0,
+            "weighted_precision": 1.0,
+            "wighted_recall": 1.0,
+            "weighted_f1": 1.0,
+            "macro_precision": 1.0,
+            "macro_recall": 1.0,
+            "macro_f1": 1.0,
+            "roc_auc": 1.0
+        },
+        "confusion_matrix": [
+            [
+                244,
+                0
+            ],
+            [
+                0,
+                42
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "ling_stemmed_countvec",
+        "model": "Extra Trees Classifier",
+        "type": "normal",
+        "metrics": {
+            "accuracy": 0.9895104895104895,
+            "weighted_precision": 0.9896378924719007,
+            "wighted_recall": 0.9895104895104895,
+            "weighted_f1": 0.9893482846639668,
+            "macro_precision": 0.9939271255060729,
+            "macro_recall": 0.9642857142857143,
+            "macro_f1": 0.9784264916647809,
+            "roc_auc": 0.9642857142857143
+        },
+        "confusion_matrix": [
+            [
+                244,
+                0
+            ],
+            [
+                3,
+                39
             ]
         ],
         "epochs": 10
@@ -394,14 +446,14 @@
         "model": "Random Forest",
         "type": "normal",
         "metrics": {
-            "accuracy": 0.986013986013986,
-            "weighted_precision": 0.9862395668847281,
-            "wighted_recall": 0.986013986013986,
-            "weighted_f1": 0.9857211893797259,
-            "macro_precision": 0.9919354838709677,
-            "macro_recall": 0.9523809523809523,
-            "macro_f1": 0.9709349593495935,
-            "roc_auc": 0.9523809523809523
+            "accuracy": 0.9895104895104895,
+            "weighted_precision": 0.9896378924719007,
+            "wighted_recall": 0.9895104895104895,
+            "weighted_f1": 0.9893482846639668,
+            "macro_precision": 0.9939271255060729,
+            "macro_recall": 0.9642857142857143,
+            "macro_f1": 0.9784264916647809,
+            "roc_auc": 0.9642857142857143
         },
         "confusion_matrix": [
             [
@@ -409,8 +461,8 @@
                 0
             ],
             [
-                4,
-                38
+                3,
+                39
             ]
         ],
         "epochs": 10
@@ -573,17 +625,17 @@
     },
     {
         "dataset": "ling_stemmed_tfidf",
-        "model": "Multi-layer Perceptron",
+        "model": "Extra Trees Classifier",
         "type": "normal",
         "metrics": {
-            "accuracy": 0.986013986013986,
-            "weighted_precision": 0.9862395668847281,
-            "wighted_recall": 0.986013986013986,
-            "weighted_f1": 0.9857211893797259,
-            "macro_precision": 0.9919354838709677,
-            "macro_recall": 0.9523809523809523,
-            "macro_f1": 0.9709349593495935,
-            "roc_auc": 0.9523809523809523
+            "accuracy": 0.9825174825174825,
+            "weighted_precision": 0.9828685370854046,
+            "wighted_recall": 0.9825174825174825,
+            "weighted_f1": 0.9820528920331216,
+            "macro_precision": 0.9899598393574297,
+            "macro_recall": 0.9404761904761905,
+            "macro_f1": 0.9632834364649395,
+            "roc_auc": 0.9404761904761905
         },
         "confusion_matrix": [
             [
@@ -591,8 +643,34 @@
                 0
             ],
             [
-                4,
-                38
+                5,
+                37
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "ling_stemmed_tfidf",
+        "model": "XGBoost Classifier",
+        "type": "normal",
+        "metrics": {
+            "accuracy": 0.993006993006993,
+            "weighted_precision": 0.9933248569612207,
+            "wighted_recall": 0.993006993006993,
+            "weighted_f1": 0.9930739181385176,
+            "macro_precision": 0.9772727272727273,
+            "macro_recall": 0.9959016393442623,
+            "macro_f1": 0.9863144798545316,
+            "roc_auc": 0.9959016393442622
+        },
+        "confusion_matrix": [
+            [
+                242,
+                2
+            ],
+            [
+                0,
+                42
             ]
         ],
         "epochs": 10
@@ -619,6 +697,32 @@
             [
                 2,
                 40
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "ling_stemmed_tfidf",
+        "model": "Multi-layer Perceptron",
+        "type": "normal",
+        "metrics": {
+            "accuracy": 0.986013986013986,
+            "weighted_precision": 0.9862395668847281,
+            "wighted_recall": 0.986013986013986,
+            "weighted_f1": 0.9857211893797259,
+            "macro_precision": 0.9919354838709677,
+            "macro_recall": 0.9523809523809523,
+            "macro_f1": 0.9709349593495935,
+            "roc_auc": 0.9523809523809523
+        },
+        "confusion_matrix": [
+            [
+                244,
+                0
+            ],
+            [
+                4,
+                38
             ]
         ],
         "epochs": 10
@@ -680,23 +784,23 @@
         "model": "Decision Tree",
         "type": "normal",
         "metrics": {
-            "accuracy": 0.9755244755244755,
-            "weighted_precision": 0.9766029268103957,
-            "wighted_recall": 0.9755244755244755,
-            "weighted_f1": 0.9758707698274,
-            "macro_precision": 0.9402950668510834,
-            "macro_recall": 0.9659445745511319,
-            "macro_f1": 0.9525536200971679,
-            "roc_auc": 0.9659445745511319
+            "accuracy": 0.9825174825174825,
+            "weighted_precision": 0.9834063585100928,
+            "wighted_recall": 0.9825174825174825,
+            "weighted_f1": 0.9827648355909999,
+            "macro_precision": 0.953480866758875,
+            "macro_recall": 0.9798985167837626,
+            "macro_f1": 0.9661097286408342,
+            "roc_auc": 0.9798985167837626
         },
         "confusion_matrix": [
             [
-                239,
-                5
+                240,
+                4
             ],
             [
-                2,
-                40
+                1,
+                41
             ]
         ],
         "epochs": 10
@@ -911,6 +1015,58 @@
     },
     {
         "dataset": "ling_lemmatized_countvec",
+        "model": "XGBoost Classifier",
+        "type": "normal",
+        "metrics": {
+            "accuracy": 1.0,
+            "weighted_precision": 1.0,
+            "wighted_recall": 1.0,
+            "weighted_f1": 1.0,
+            "macro_precision": 1.0,
+            "macro_recall": 1.0,
+            "macro_f1": 1.0,
+            "roc_auc": 1.0
+        },
+        "confusion_matrix": [
+            [
+                244,
+                0
+            ],
+            [
+                0,
+                42
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "ling_lemmatized_countvec",
+        "model": "Extra Trees Classifier",
+        "type": "normal",
+        "metrics": {
+            "accuracy": 0.9895104895104895,
+            "weighted_precision": 0.9896378924719007,
+            "wighted_recall": 0.9895104895104895,
+            "weighted_f1": 0.9893482846639668,
+            "macro_precision": 0.9939271255060729,
+            "macro_recall": 0.9642857142857143,
+            "macro_f1": 0.9784264916647809,
+            "roc_auc": 0.9642857142857143
+        },
+        "confusion_matrix": [
+            [
+                244,
+                0
+            ],
+            [
+                3,
+                39
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "ling_lemmatized_countvec",
         "model": "Multi-layer Perceptron",
         "type": "normal",
         "metrics": {
@@ -992,23 +1148,23 @@
         "model": "Decision Tree",
         "type": "normal",
         "metrics": {
-            "accuracy": 0.9545454545454546,
-            "weighted_precision": 0.9535403867387672,
-            "wighted_recall": 0.9545454545454546,
-            "weighted_f1": 0.9538425668771902,
-            "macro_precision": 0.9197031039136303,
-            "macro_recall": 0.8945160031225605,
-            "macro_f1": 0.9065147972140506,
-            "roc_auc": 0.8945160031225605
+            "accuracy": 0.9370629370629371,
+            "weighted_precision": 0.9399994932603628,
+            "wighted_recall": 0.9370629370629371,
+            "weighted_f1": 0.9382332543489569,
+            "macro_precision": 0.8658514492753624,
+            "macro_recall": 0.8941256830601093,
+            "macro_f1": 0.8791322314049588,
+            "roc_auc": 0.8941256830601093
         },
         "confusion_matrix": [
             [
-                239,
-                5
+                233,
+                11
             ],
             [
-                8,
-                34
+                7,
+                35
             ]
         ],
         "epochs": 10
@@ -1197,6 +1353,58 @@
     },
     {
         "dataset": "ling_lemmatized_tfidf",
+        "model": "Extra Trees Classifier",
+        "type": "normal",
+        "metrics": {
+            "accuracy": 0.9825174825174825,
+            "weighted_precision": 0.9828685370854046,
+            "wighted_recall": 0.9825174825174825,
+            "weighted_f1": 0.9820528920331216,
+            "macro_precision": 0.9899598393574297,
+            "macro_recall": 0.9404761904761905,
+            "macro_f1": 0.9632834364649395,
+            "roc_auc": 0.9404761904761905
+        },
+        "confusion_matrix": [
+            [
+                244,
+                0
+            ],
+            [
+                5,
+                37
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "ling_lemmatized_tfidf",
+        "model": "XGBoost Classifier",
+        "type": "normal",
+        "metrics": {
+            "accuracy": 0.9965034965034965,
+            "weighted_precision": 0.9965848105382988,
+            "wighted_recall": 0.9965034965034965,
+            "weighted_f1": 0.996520474331804,
+            "macro_precision": 0.9883720930232558,
+            "macro_recall": 0.9979508196721312,
+            "macro_f1": 0.9930909530136489,
+            "roc_auc": 0.9979508196721312
+        },
+        "confusion_matrix": [
+            [
+                243,
+                1
+            ],
+            [
+                0,
+                42
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "ling_lemmatized_tfidf",
         "model": "K-nearest Neighbors",
         "type": "normal",
         "metrics": {
@@ -1226,14 +1434,14 @@
         "model": "Multi-layer Perceptron",
         "type": "normal",
         "metrics": {
-            "accuracy": 0.9895104895104895,
-            "weighted_precision": 0.9896378924719007,
-            "wighted_recall": 0.9895104895104895,
-            "weighted_f1": 0.9893482846639668,
-            "macro_precision": 0.9939271255060729,
-            "macro_recall": 0.9642857142857143,
-            "macro_f1": 0.9784264916647809,
-            "roc_auc": 0.9642857142857143
+            "accuracy": 0.993006993006993,
+            "weighted_precision": 0.9930638467223832,
+            "wighted_recall": 0.993006993006993,
+            "weighted_f1": 0.9929359838767505,
+            "macro_precision": 0.9959349593495934,
+            "macro_recall": 0.9761904761904762,
+            "macro_f1": 0.9857640617222498,
+            "roc_auc": 0.9761904761904762
         },
         "confusion_matrix": [
             [
@@ -1241,8 +1449,8 @@
                 0
             ],
             [
-                3,
-                39
+                2,
+                40
             ]
         ],
         "epochs": 10

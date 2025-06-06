@@ -14,7 +14,8 @@ from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.ensemble import (
     RandomForestClassifier, 
     AdaBoostClassifier, 
-    HistGradientBoostingClassifier
+    HistGradientBoostingClassifier,
+    ExtraTreesClassifier
 )
 from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
 from sklearn.neighbors import KNeighborsClassifier
@@ -30,6 +31,7 @@ from sklearn.preprocessing import FunctionTransformer
 from sklearn.utils.validation import check_is_fitted
 from sklearn.exceptions import NotFittedError
 from sklearn.decomposition import TruncatedSVD
+from xgboost import XGBClassifier
 from keras.src.models import Sequential
 from keras.src.layers import (
     Dense, 
@@ -52,9 +54,12 @@ from transformers import (
     AutoTokenizer, 
     AutoModelForSequenceClassification,
     TrainingArguments,
-    Trainer
+    Trainer,
+    EarlyStoppingCallback,
+    DataCollatorWithPadding
 )
-from datasets import load_dataset, DatasetDict, Dataset
+from transformers.trainer_utils import PredictionOutput
+from datasets import load_dataset, DatasetDict, Dataset, Features, Value, ClassLabel
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
 from abc import ABC, abstractmethod
@@ -139,6 +144,15 @@ model_parameters = {
         "activation": ["relu", "identity", "logistic", "tanh"],
         "learning_rate": [0.001, 0.01, 0.1],
         "solver": ["lbfgs", "sgd", "adam"]
+    },
+    "ExtraTreesClassifier": {
+        "n_estimators": [100, 200],
+        "max_depth": [None, 10, 15]
+    },
+    "XGBClassifier": {
+        "n_estimators": [100, 200],
+        "max_depth": [3, 6, 9],
+        "learning_rate": [0.001, 0.01, 0.1]
     }
 }
 
@@ -614,7 +628,9 @@ def get_classification_models(X):
         #     ),
         Perceptron(),
         PassiveAggressiveClassifier(),
-        MLPClassifier(hidden_layer_sizes=(150, 75), early_stopping=True)
+        MLPClassifier(hidden_layer_sizes=(150, 75), early_stopping=True),
+        ExtraTreesClassifier(),
+        XGBClassifier()
     ]
 
 def get_nn_classification_models(dataset_name):
@@ -687,6 +703,12 @@ class ClassificationModel:
         elif isinstance(self.model, MLPClassifier):
             self.model_name = "Multi-layer Perceptron"
             self.model_parameters = model_parameters["MLPClassifier"]
+        elif isinstance(self.model, ExtraTreesClassifier):
+            self.model_name = "Extra Trees Classifier"
+            self.model_parameters = model_parameters["ExtraTreesClassifier"]
+        elif isinstance(self.model, XGBClassifier):
+            self.model_name = "XGBoost Classifier"
+            self.model_parameters = model_parameters["XGBClassifier"]
         else:
             self.model_name = ""
             self.model_parameters = {}
@@ -1064,9 +1086,10 @@ class ClassificationModel:
             return int(total_combinations / 2) + 20
 
 class TransformerClassificationModel:
-    def __init__(self, data_input, model_checkpoint):
+    def __init__(self, data_input, model_checkpoint, x_features, y_feature):
         self.model_checkpoint = model_checkpoint
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_checkpoint)
+        self.y_feature = y_feature
         if isinstance(data_input, list):
             self.dataset = Dataset.from_list(data_input)
         elif isinstance(data_input, dict):
@@ -1076,6 +1099,7 @@ class TransformerClassificationModel:
         elif isinstance(data_input, str):
             file_extension = os.path.splitext(data_input)[1]
             if file_extension == ".csv":
+                df = pd.read_csv(data_input)
                 self.dataset = Dataset.from_csv(data_input)
             elif file_extension == ".sql":
                 self.dataset = Dataset.from_sql(data_input)
@@ -1087,7 +1111,9 @@ class TransformerClassificationModel:
         self.__label2id = {label: i for i, label in enumerate(features)}
         self.__id2label = {i: label for label, i in self.__label2id.items()}
             
-    def set_model(self):
+    def set_model(self, y_feature):
+        self.__set_label_encoder_decoder(self.dataset[y_feature])
+
         self.model = AutoModelForSequenceClassification.from_pretrained(
             self.model_checkpoint,
             id2label=self.__id2label,
@@ -1124,22 +1150,40 @@ class TransformerClassificationModel:
                 "test": self.__test_set
             })
 
-    def tokenizing(self, features):
+    def tokenizing(self, input_features:list[str]=None, merged_feature:str=None):
+        if input_features is not None and merged_feature is not None:
+            merge_preprocess_func = partial(
+                self.__merge_features,
+                input_features=input_features,
+                output_feature=merged_feature
+            )
+
+            self.dataset = self.dataset.map(merge_preprocess_func, batched=True)
+
         preprocess_func = partial(
             self.__preprocess_function,
-            features=features
+            feature=merged_feature
         )
 
-        self.tokenized_dataset = self.dataset.map(preprocess_func, batched=True)
+        self.dataset = self.dataset.map(preprocess_func)
+
+        self.tokenized_dataset = self.dataset.rename_column(self.y_feature, "label")
+
+        print(self.tokenized_dataset["train"][0])
 
     def train(self,
               save_path,
-              batch_size=16,
+              batch_size=8,
               epochs=20,
-              metric_monitor="accuracy"):
-        self.model = AutoModelForSequenceClassification.from_pretrained(
-            self.model_checkpoint, num_labels = 2
-        )
+              metric_monitor="accuracy",
+              epoch_limitation=3,
+              num_workers=4):
+        data_collator = DataCollatorWithPadding(self.tokenizer)
+
+        if not isinstance(self.tokenized_dataset["train"][0]["label"], int):
+            self.tokenized_dataset = self.tokenized_dataset.map(self.__encoder)
+
+        print(self.tokenized_dataset)
 
         self.__training_args = TrainingArguments(
             output_dir=save_path,
@@ -1152,7 +1196,10 @@ class TransformerClassificationModel:
             save_strategy="epoch",
             evaluation_strategy="epoch",
             logging_strategy="epoch",
-            weight_decay=0.01
+            weight_decay=0.01,
+            dataloader_num_workers=num_workers,
+            remove_unused_columns=True,
+            auto_find_batch_size=True
         )
 
         self.trainer = Trainer(
@@ -1160,7 +1207,9 @@ class TransformerClassificationModel:
             args=self.__training_args,
             train_dataset=self.tokenized_dataset["train"],
             eval_dataset=self.tokenized_dataset["validation"],
-            compute_metrics=self.__compute_metrics
+            compute_metrics=self.__compute_metrics,
+            callbacks=[EarlyStoppingCallback(early_stopping_patience=epoch_limitation)],
+            data_collator=data_collator
         )
 
         self.trainer.train()
@@ -1194,11 +1243,51 @@ class TransformerClassificationModel:
 
         return metrics
 
-    def __preprocess_function(self, examples, features):
-        return self.tokenizer(examples[features], truncation=True, padding=True)
+    def __merge_features(
+            self, 
+            example, 
+            input_features:list[str]|tuple[str], 
+            output_feature:str):
+        merged_features = []
+
+        if len(input_features) == 2:
+            for feature1, feature2 in zip(
+                example[input_features[0]], 
+                example[input_features[1]]
+            ):
+                merged = f"{feature1} [SEP] {feature2}"
+                merged_features.append(merged)
+        elif len(input_features) == 3:
+            for feature1, feature2, feature3 in zip(
+                example[input_features[0]], 
+                example[input_features[1]],
+                example[input_features[2]]
+            ):
+                merged = f"{feature1} [SEP] {feature2} [SEP] {feature3}"
+                merged_features.append(merged)
+        elif len(input_features) == 4:
+            for feature1, feature2, feature3, feature4 in zip(
+                example[input_features[0]], 
+                example[input_features[1]],
+                example[input_features[2]],
+                example[input_features[3]]
+            ):
+                merged = f"{feature1} [SEP] {feature2} [SEP] {feature3} [SEP] {feature4}"
+                merged_features.append(merged)
+        example[output_feature] = merged_features
+        return example
+
+    def __preprocess_function(self, examples, feature):
+        return self.tokenizer(examples[feature], truncation=True, padding=True)
     
-    def __compute_metrics(self, pred):
-        logits, labels = pred
+    def __encoder(self, example):
+        example["label"] = self.__label2id[example["label"]]
+        return example
+    
+    def __compute_metrics(self, pred:PredictionOutput):
+        logits = pred.predictions
+        labels = pred.label_ids
+
         preds = np.argmax(logits, axis=1)
         return {
             "accuracy": accuracy_score(labels, preds),
