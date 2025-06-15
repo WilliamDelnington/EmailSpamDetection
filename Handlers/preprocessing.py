@@ -205,7 +205,7 @@ class EnronPreprocess:
 
         words, counts = zip(*most_common)
 
-        plt.figure(figsize=(10, 6))
+        plt.figure(figsize=(12, 6))
         plt.bar(words, counts, color="skyblue")
         plt.title(title)
         plt.xlabel(xlabel)

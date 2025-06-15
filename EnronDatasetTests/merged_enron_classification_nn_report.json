@@ -1,0 +1,77 @@
+[
+    {
+        "dataset": "Enron",
+        "model": "CNN",
+        "metrics": {
+            "accuracy": 0.9878410438908659,
+            "weighted_precision": 0.9879004517319115,
+            "wighted_recall": 0.9878410438908659,
+            "weighted_f1": 0.9878393564985819,
+            "macro_precision": 0.9880005070431461,
+            "macro_recall": 0.9877296792057354,
+            "macro_f1": 0.9878336726508878,
+            "roc_auc": 0.9877296792057354
+        },
+        "confusion_matrix": [
+            [
+                1624,
+                30
+            ],
+            [
+                11,
+                1707
+            ]
+        ],
+        "epochs": 16
+    },
+    {
+        "dataset": "Enron",
+        "model": "RNN",
+        "metrics": {
+            "accuracy": 0.9908066429418743,
+            "weighted_precision": 0.9908264094124933,
+            "wighted_recall": 0.9908066429418743,
+            "weighted_f1": 0.9908059755700828,
+            "macro_precision": 0.9908839118724758,
+            "macro_recall": 0.9907413924405224,
+            "macro_f1": 0.9908020926796599,
+            "roc_auc": 0.9907413924405223
+        },
+        "confusion_matrix": [
+            [
+                1633,
+                21
+            ],
+            [
+                10,
+                1708
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "Enron",
+        "model": "ANN",
+        "metrics": {
+            "accuracy": 0.9908066429418743,
+            "weighted_precision": 0.9908067121372756,
+            "wighted_recall": 0.9908066429418743,
+            "weighted_f1": 0.9908065903675429,
+            "macro_precision": 0.9908089263901162,
+            "macro_recall": 0.9907976993016541,
+            "macro_f1": 0.9908032256103403,
+            "roc_auc": 0.9907976993016541
+        },
+        "confusion_matrix": [
+            [
+                1638,
+                16
+            ],
+            [
+                15,
+                1703
+            ]
+        ],
+        "epochs": 17
+    }
+]

@@ -4,7 +4,6 @@ test2.py
 test3.py
 TempData
 coyo-700m
-MaliciousWebsiteFeatures24M
 .env
 __pycache__
 other_spam_emails.csv
@@ -23,3 +22,19 @@ LingspamDatasetTests/models
 LingspamDatasetTests/figs
 SMSSpamDatasetTests/figs
 SMSSpamDatasetTests/models
+TREC2007DatasetTests/trec07p
+TREC2007DatasetTests/tt
+TREC2007DatasetTests/processed_data.csv
+TREC2007DatasetTests/trec07p.zip
+enron_pie_chart.png
+ling_pie_chart.png
+spam_assassin_pie_chart.png
+CNN model for phishing urls.txt
+MaliciousURLDatasetTests/figs
+MaliciousURLDatasetTests/models
+MaliciousURLDatasetTests/malicious_phish.csv
+MaliciousURLDatasetTests/malicious_phish_cleaned.csv
+MaliciousURLDatasetTests/malicious_phish_preprocessed.csv
+ImageSpamDatasetTests/data
+ImageSpamDatasetTests/model
+ImageSpamDatasetTests/SPAM IMAGE dataset

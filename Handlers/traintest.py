@@ -1,6 +1,6 @@
 import scipy.sparse
 from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV
-from sklearn.svm import SVC
+from sklearn.svm import SVC, LinearSVC
 from sklearn.metrics import (
     classification_report, 
     confusion_matrix, 
@@ -27,51 +27,24 @@ from sklearn.linear_model import (
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.base import BaseEstimator
 from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import FunctionTransformer
+from sklearn.preprocessing import FunctionTransformer, StandardScaler
+from sklearn.decomposition import IncrementalPCA
 from sklearn.utils.validation import check_is_fitted
 from sklearn.exceptions import NotFittedError
-from sklearn.decomposition import TruncatedSVD
 from xgboost import XGBClassifier
-from keras.src.models import Sequential
-from keras.src.layers import (
-    Dense, 
-    Conv1D, 
-    GlobalMaxPooling1D, 
-    Embedding, 
-    Dropout, 
-    LSTM, 
-    Bidirectional, 
-    GRU, 
-    MaxPooling1D
-)
-from keras.src.layers import TextVectorization
-from keras.src.callbacks import (
-    EarlyStopping, 
-    ModelCheckpoint, 
-    ReduceLROnPlateau
-)
-from transformers import (
-    AutoTokenizer, 
-    AutoModelForSequenceClassification,
-    TrainingArguments,
-    Trainer,
-    EarlyStoppingCallback,
-    DataCollatorWithPadding
-)
-from transformers.trainer_utils import PredictionOutput
-from datasets import load_dataset, DatasetDict, Dataset, Features, Value, ClassLabel
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
-from abc import ABC, abstractmethod
+from collections import Counter
+import faiss
 import matplotlib.pyplot as plt
 import numpy as np
 import traceback as trb
 import pandas as pd
 import scipy
+from scipy.spatial import distance
 import joblib
 import json
 import math
-import os
 
 model_parameters = {
     "SVM": {
@@ -156,489 +129,61 @@ model_parameters = {
     }
 }
 
-class NeuralNetworkClassifier(ABC):
-    def __init__(self, 
-                 data_name:str, 
-                 model_name:str, 
-                 max_features:int, 
-                 input_length:int):
-        self.model = Sequential()
-        self.epochs = 10
-        self.history = None
-        self.data_name = data_name
-        self.model_name = model_name
-        self.max_features = max_features
-        self.input_length = input_length
+class CustomKNeighbors:
+    def __init__(self, k=5):
+        self.index = None
+        self.y = None
+        self.k = k
 
-    def load_data(self, X, y):
-        """
-        Load and preprocess the data.
-        Parameters:
-        - X: The input samples and features to be processed.
-        - y: The input label from each sample of the dataset
-        """
-        self.X = X
+    def fit(self, X, y):
+        self.index = faiss.IndexFlatL2(X.shape[1])
+        self.index.add(X.astype(np.float32))
         self.y = y
-        if isinstance(self.X, (pd.DataFrame, pd.Series)):
-            self.X = self.X.astype(str).values
-        if isinstance(self.y, (pd.DataFrame, pd.Series)):
-            self.y = self.y.astype(np.int32).values
 
-    def split(self, test_size=0.1, valid_size=0.1, random_state=42):
-        """
-        Split the data into training and testing sets.
-        Parameters:
-        - test_size: The proportion of the dataset to include in the test part.
-        - valid_size: The proportion of the dataset to include in the validation part.
-        - random_state: Controls the shuffling applied to the data before applying the split.
-        """
-        if not hasattr(self, 'X') or not hasattr(self, 'y'):
-            raise ValueError("Data has not been loaded. Call load_data() first.")
-        
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
-            self.X, self.y, test_size=test_size, random_state=random_state
-        )
+    def predict(self, X):
+        distances, indices = self.index.search(X.astype(np.float32), k=self.k)
+        votes = self.y[indices]
+        predictions = np.array([np.argmax(np.bincount(x)) for x in votes])
+        return predictions
 
-        if valid_size > 0:
-            val_ratio = valid_size / (1 - test_size)
-
-            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(
-                self.X_train, self.y_train, test_size=val_ratio, random_state=random_state
-            )
-
-    def reduce_dim(self, input, num_features=100):
-        try:
-            l = self.X.shape
-            print(l)
-        except Exception as e:
-            print(f"An error when getting the shape: {trb.print_exc()}")
-            l = len(self.X[0])
-        svd = TruncatedSVD(n_components=num_features)
-        self.X_train = svd.fit_transform(input)
-        
-    def vectorizing(self, data_input=None, print_shape=True):
-        self.vectorizer = TextVectorization(
-            max_tokens=self.max_features,
-            output_mode="int",
-            output_sequence_length=self.input_length
-        )
-
-        self.vectorizer.adapt(self.X_train)
-
-        if data_input is None:
-            vectorized = self.vectorizer(self.X_train)
-        else:
-            vectorized = self.vectorizer(data_input)
-        
-        if print_shape:
-            print(f"Shape of the input data is {vectorized.shape}")
-        
-        return vectorized
-    
-    def get_callbacks(
-        self,
-        callback_methods=["early-stop"],
-        early_stopping_monitor="val_accuracy",
-        epoch_limitation=5,
-        min_delta=0.001,
-        save_path="./best_model.h5"
-    ):
-        """
-        Setup callbacks for the model whether the model stops improving.
-
-        Note that early-stopping must always come first.
-        """
-        self.callbacks = []
-        for method in callback_methods:
-            if method.lower() in [
-                "earlystopping", 
-                "earlystop", 
-                "early stop", 
-                "early stopping"
-            ]:
-                early_stopping = EarlyStopping(
-                    monitor=early_stopping_monitor,
-                    patience=epoch_limitation,
-                    min_delta=min_delta,
-                    mode="max",
-                    verbose=1,
-                    restore_best_weights=True
-                )
-
-                self.callbacks.append(early_stopping)
-
-            elif method.lower() in [
-                "model checkpoint", 
-                "modelcheckpoint"
-            ]:
-                if len(self.callbacks) == 0:
-                    raise ValueError("Early-stopping must always comes first.")
-                model_checkpoint = ModelCheckpoint(
-                    save_path,
-                    monitor=early_stopping_monitor,
-                    save_best_only=True,
-                    mode="max",
-                    verbose=1
-                )
-
-                self.callbacks.append(model_checkpoint)
-
-            elif method.lower() in [
-                "reducelr", 
-                "reduce learning rate", 
-                "reducelearningrate",
-                "reducelronplateau",
-                "reduce learning rate on plateau"
-            ]:
-                if len(self.callbacks) == 0:
-                    raise ValueError("Early-stopping must always comes first.")
-                reducelr = ReduceLROnPlateau(
-                    monitor=early_stopping_monitor,
-                    factor=0.5,
-                    patience=epoch_limitation-3,
-                    min_lr=1e-6,
-                    verbose=1
-                )
-
-                self.callbacks.append(reducelr)
-
-            else:
-                raise ValueError("""
-                    Unknown callback method. The available methods are
-                    EarlyStopping, ModelCheckpoint and ReduceLROnPlateau""")
-
-    @abstractmethod
-    def build(self):
-        pass
-
-    def plot_training_validation_accuracy(
-            self,
-            figsize=(10, 6),
-            plot_xlabel="Epochs",
-            plot_ylabel="Accuracy",
-            save_plot=True,
-            parent_folder="./figs/"):
-        if self.history is None:
-            raise ValueError("Model is not trained. Call build() method before plotting.")
-        accuracy = self.history.history["accuracy"]
-        plt.figure(figsize=figsize)
-        plt.plot(
-            range(1, self.epochs + 1),
-            accuracy,
-            color="blue", 
-            linestyle="--", 
-            linewidth=2, 
-            label="Training Accuracy"
-        )
-        if hasattr(self, "X_val"):
-            val_accuracy = self.history.history["val_accuracy"]
-            plt.plot(
-                range(1, self.epochs + 1),
-                val_accuracy,
-                color="red", 
-                linestyle="--", 
-                linewidth=2, 
-                label="Validation Accuracy"
-            )
-        plt.title(f"{self.model_name} Train-Val Accuracy Results for {self.data_name}")
-        plt.xlabel(xlabel=plot_xlabel)
-        plt.ylabel(ylabel=plot_ylabel)
-        plt.grid(True, alpha=0.3)
-        if save_plot:
-            plt.savefig(os.path.join(parent_folder, f"{self.model_name}_{self.data_name}.jpg"))
-        plt.show()
-
-    def evaluate(self, detailed=True):
-        y_pred = self.model.predict(self.X_test)
-        y_pred_classes = (y_pred > 0.5).astype(int)
-
-        self.confusion_matrix = confusion_matrix(self.y_test, y_pred_classes)
-        if detailed:
-            self.metrics = {
-                "accuracy": accuracy_score(self.y_test, y_pred_classes),
-                "weighted_precision": precision_score(self.y_test, y_pred_classes, average='weighted'),
-                "wighted_recall": recall_score(self.y_test, y_pred_classes, average='weighted'),
-                "weighted_f1": f1_score(self.y_test, y_pred_classes, average='weighted'),
-                "macro_precision": precision_score(self.y_test, y_pred_classes, average='macro'),
-                "macro_recall": recall_score(self.y_test, y_pred_classes, average='macro'),
-                "macro_f1": f1_score(self.y_test, y_pred_classes, average='macro'),
-                "roc_auc": roc_auc_score(self.y_test, y_pred_classes)
-            }
-            detailed_metrics = {
-                "dataset": self.data_name,
-                "model": self.model_name,
-                "metrics": self.metrics,
-                "confusion_matrix": self.confusion_matrix,
-                "epochs": self.epochs
-            }
-            return detailed_metrics
-
-        return classification_report(self.y_test, y_pred)
-
-class ConvolutionalNNClassifier(NeuralNetworkClassifier):
-    # def __init__(self, vocab_size, embedding_size, num_filters, filter_sizes, hidden_size, output_size, dropout=0.2):
-    def __init__(self, data_name, model_name="CNN", max_features=5000, input_length=200):
-        super().__init__(data_name, model_name, max_features, input_length)
-
-    def build(self,
-              embedding_size=128, 
-              num_filters=[64],
-              conv_layer_num=1,
-              kernel_sizes=[5], 
-              hidden_size=64,
-              max_pooling=False,
-              pooling_sizes=[2],
-              pooling_dropout=False, 
-              pooling_dropout_rate=0.2,
-              dense_dropout=False,
-              dense_dropout_rate=0.5,
-              epochs=10,
-              batch_size=32,
-              callback_methods=["early stopping"],
-              epoch_limitation=7,
-              save_model=True):
-
-        assert len(kernel_sizes) == conv_layer_num, "the len of filter_sizes parameters must match the number of hidden layer"
-        assert len(num_filters) == conv_layer_num, "the len of num_filters parameters must match the number of hidden layer"
-        
-        self.model.add(self.vectorizer)
-    
-        self.model.add(Embedding(
-            input_dim=self.max_features, 
-            output_dim=embedding_size,
-            input_length=self.input_length
-        ))
-
-        for i in range(conv_layer_num):
-            self.model.add(Conv1D(
-                filters=num_filters[i], 
-                kernel_size=kernel_sizes[i], 
-                activation='relu'
-            ))
-
-            if max_pooling:
-                assert len(pooling_sizes) == conv_layer_num
-                assert pooling_sizes[conv_layer_num - 1] == 0
-
-                if pooling_sizes[i] != 0:
-                    self.model.add(MaxPooling1D(pooling_sizes[i]))
-
-        self.model.add(GlobalMaxPooling1D())
-
-        if pooling_dropout:
-            self.model.add(Dropout(pooling_dropout_rate))
-
-        self.model.add(Dense(hidden_size, activation='relu'))
-
-        if dense_dropout:
-            self.model.add(Dropout(dense_dropout_rate))
-
-        self.model.add(Dense(1, activation='sigmoid'))
-
-        self.model.compile(
-            loss='binary_crossentropy',
-            optimizer='adam',
-            metrics=['accuracy', 'precision', 'recall']
-        )
-
-        self.get_callbacks(
-            callback_methods=callback_methods,
-            epoch_limitation=epoch_limitation
-        )
-
-        self.history = self.model.fit(
-            self.X_train, 
-            self.y_train, 
-            epochs=epochs, 
-            batch_size=batch_size,
-            callbacks=(None if len(self.callbacks) == 0 else self.callbacks),
-            validation_data=(self.X_val, self.y_val)
-        )
-
-        stopped_epoch = self.callbacks[0].stopped_epoch
-
-        self.epochs = stopped_epoch + 1 if stopped_epoch != 0 else epochs
-
-        if save_model:
-            self.model.save(f"./models/Classify_{self.data_name}_CNN_model.h5")
-
-class RecurrentNNClassifier(NeuralNetworkClassifier):
-    def __init__(self, data_name, model_name="RNN", max_features=5000, input_length=200):
-        super().__init__(data_name, model_name, max_features, input_length)
-
-    def build(self,
-              embedding_size=64, 
-              units=64,
-              hidden_layer_num=1,
-              hidden_sizes=[128],
-              lstm=True,
-              pooling_dropout=False, 
-              pooling_dropout_rate=0.2,
-              dense_dropout=False,
-              dense_dropout_rate=0.5,
-              bidirectional=False,
-              epochs=10,
-              batch_size=32,
-              epoch_limitation=7,
-              callback_methods=["early stopping"],
-              save_model=True):
-        
-        assert len(hidden_sizes) == hidden_layer_num, "the size of hidden_sizes parameters must match the number of hidden layer"
-        
-        self.model.add(self.vectorizer)
-    
-        self.model.add(Embedding(
-            input_dim=self.max_features, 
-            output_dim=embedding_size,
-            input_length=self.input_length
-        ))
-
-        for i in range(hidden_layer_num):
-            if bidirectional:
-                if i == hidden_layer_num - 1:
-                    if lstm:
-                        self.model.add(Bidirectional(LSTM(hidden_sizes[i])))
-                    else:
-                        self.model.add(Bidirectional(GRU(hidden_sizes[i])))
-                else:
-                    if lstm:
-                        self.model.add(Bidirectional(LSTM(hidden_sizes[i], return_sequences=True)))
-                    else:
-                        self.model.add(Bidirectional(GRU(hidden_sizes[i], return_sequences=True)))
-            else:
-                if i == hidden_layer_num - 1:
-                    if lstm:
-                        self.model.add(LSTM(hidden_sizes[i]))
-                    else:
-                        self.model.add(GRU(hidden_sizes[i]))
-                else:
-                    if lstm:
-                        self.model.add(LSTM(hidden_sizes[i], return_sequences=True))
-                    else:
-                        self.model.add(GRU(hidden_sizes[i], return_sequences=True))
-
-        if pooling_dropout:
-            self.model.add(Dropout(pooling_dropout_rate))
-
-        self.model.add(Dense(units, activation='relu'))
-
-        if dense_dropout:
-            self.model.add(Dropout(dense_dropout_rate))
-
-        self.model.add(Dense(1, activation='sigmoid'))
-
-        self.model.compile(
-            loss='binary_crossentropy',
-            optimizer='adam',
-            metrics=['accuracy', 'precision', 'recall']
-        )
-
-        self.get_callbacks(
-            callback_methods=callback_methods,
-            epoch_limitation=epoch_limitation
-        )
-
-        self.history = self.model.fit(
-            self.X_train, 
-            self.y_train, 
-            epochs=epochs, 
-            batch_size=batch_size,
-            callbacks=(None if len(self.callbacks) == 0 else self.callbacks),
-            validation_data=(self.X_val, self.y_val)
-        )
-
-        stopped_epoch = self.callbacks[0].stopped_epoch
-
-        self.epochs = stopped_epoch + 1 if stopped_epoch != 0 else epochs
-
-        if save_model:
-            self.model.save(f"./models/Classify_{self.data_name}_RNN_model.h5")
-
-class ArtificialNNClassifier(NeuralNetworkClassifier):
-    def __init__(self, data_name, model_name="ANN", max_features=5000, input_length=200):
-        super().__init__(data_name, model_name, max_features, input_length)
-
-    def build(self,
-              hidden_layer_num=2,
-              hidden_layer_sizes=[64, 64],
-              embedding_size=64,
-              callback_methods=["early stopping"],
-              epochs=10,
-              batch_size=32,
-              epoch_limitation=7,
-              save_model=True):
-        assert len(hidden_layer_sizes) == hidden_layer_num
-
-        self.model.add(self.vectorizer)
-
-        self.model.add(Embedding(
-            input_dim=self.max_features,
-            output_dim=embedding_size
-        ))
-
-        self.model.add(GlobalMaxPooling1D())
-
-        for i in range(hidden_layer_num):
-            self.model.add(Dense(hidden_layer_sizes[i], activation="relu"))
-
-        self.model.add(Dense(1, activation='sigmoid'))
-
-        self.model.compile(
-            loss='binary_crossentropy',
-            optimizer='adam',
-            metrics=['accuracy', 'precision', 'recall']
-        )
-
-        self.get_callbacks(
-            callback_methods=callback_methods,
-            epoch_limitation=epoch_limitation
-        )
-
-        self.history = self.model.fit(
-            self.X_train, 
-            self.y_train, 
-            epochs=epochs, 
-            batch_size=batch_size,
-            callbacks=(None if len(self.callbacks) == 0 else self.callbacks),
-            validation_data=(self.X_val, self.y_val)
-        )
-
-        stopped_epoch = self.callbacks[0].stopped_epoch
-
-        self.epochs = stopped_epoch + 1 if stopped_epoch != 0 else epochs
-
-        if save_model:
-            self.model.save(f"./models/Classify_{self.data_name}_ANN_model.h5")
-
-def get_classification_models(X):
-    return [
-        SVC(),
-        MultinomialNB(),
-        BernoulliNB(),
-        RandomForestClassifier(),
-        DecisionTreeClassifier(),
-        AdaBoostClassifier(),
-        LogisticRegression(n_jobs=4),
-        KNeighborsClassifier(n_jobs=4),
-        SGDClassifier(),
-        # HistGradientBoostingClassifier(
-        #     early_stopping=True, 
-        #     n_iter_no_change=6,
-        #     max_bins=199,
-        #     ),
-        Perceptron(),
-        PassiveAggressiveClassifier(),
-        MLPClassifier(hidden_layer_sizes=(150, 75), early_stopping=True),
-        ExtraTreesClassifier(),
-        XGBClassifier()
-    ]
-
-def get_nn_classification_models(dataset_name):
-    return [
-        ConvolutionalNNClassifier(dataset_name),
-        RecurrentNNClassifier(dataset_name),
-        ArtificialNNClassifier(dataset_name)
-    ]
+def get_classification_models(nomlp = True):
+    if not nomlp:
+        return [
+            SVC(),
+            MultinomialNB(),
+            BernoulliNB(),
+            RandomForestClassifier(n_jobs=4),
+            DecisionTreeClassifier(),
+            AdaBoostClassifier(),
+            LogisticRegression(n_jobs=4),
+            KNeighborsClassifier(n_jobs=4),
+            SGDClassifier(),
+            Perceptron(),
+            PassiveAggressiveClassifier(n_jobs=4),
+            MLPClassifier(
+                hidden_layer_sizes=(100, ), 
+                early_stopping=True,
+                n_iter_no_change=6
+            ),
+            ExtraTreesClassifier(n_jobs=4),
+            XGBClassifier()
+        ]
+    else:
+        return [
+            KNeighborsClassifier(n_jobs=5),
+            LinearSVC(),
+            MultinomialNB(),
+            BernoulliNB(),
+            RandomForestClassifier(n_jobs=4),
+            DecisionTreeClassifier(),
+            AdaBoostClassifier(),
+            LogisticRegression(n_jobs=4),
+            SGDClassifier(),
+            Perceptron(),
+            PassiveAggressiveClassifier(n_jobs=4),
+            ExtraTreesClassifier(n_jobs=4),
+            XGBClassifier(),
+        ]
 
 class EvaluateError(Exception):
     def __init__(self, *args):
@@ -709,6 +254,12 @@ class ClassificationModel:
         elif isinstance(self.model, XGBClassifier):
             self.model_name = "XGBoost Classifier"
             self.model_parameters = model_parameters["XGBClassifier"]
+        elif isinstance(self.model, LinearSVC):
+            self.model_name = "LinearSVC"
+            self.model_parameters = {}
+        elif isinstance(self.model, CustomKNeighbors):
+            self.model_name = "K-nearest Neighbors"
+            self.model_parameters = {}
         else:
             self.model_name = ""
             self.model_parameters = {}
@@ -753,12 +304,29 @@ class ClassificationModel:
                 self.X_train, self.y_train, test_size=val_ratio, random_state=random_state
             )
 
+    def __reduce_dim(self, n_dim=100):
+        print("Begin dimensional reduction")
+        scaler = StandardScaler()
+        self.X_train = scaler.fit_transform(self.X_train)
+        self.X_test = scaler.transform(self.X_test)
+
+        print(self.X_train)
+        print(self.X_test)
+
+        pca = IncrementalPCA(n_components=n_dim, batch_size=1000)
+        self.X_train = pca.fit_transform(self.X_train)
+        self.X_test = pca.fit_transform(self.X_test)
+
+        print(self.X_train)
+        print(self.X_test)
+
+        print("Finish dimensional reduction")
+
     def train(self, X, y, random_state=42, test_size=0.2, valid_size=0, partial=False, save_model=False):
         if not self.__is_valid_input(X):
             raise TypeError("Input data must be a numpy array, pandas DataFrame, list, or pandas Series.")
         if self.__is_trained():
             print("The model has already been trained. This process will overwrite the previous training.")
-
 
         self.__split_train_val_test(X, y, test_size=test_size, valid_size=valid_size, random_state=random_state)
 
@@ -777,6 +345,9 @@ class ClassificationModel:
                 self.__fitting_model(X_temp, self.y_train, partial=partial)
 
         else:
+            if isinstance(self.model, KNeighborsClassifier):
+                if X.shape[1] > 10000:
+                    self.__reduce_dim()
             try:
                 self.__fitting_model(self.X_train, self.y_train, partial=partial)
             except TypeError:
@@ -794,31 +365,46 @@ class ClassificationModel:
                 print(f"Error saving model: {e}")
                 trb.print_exc()
 
-    def train_with_epochs(self, X, y, epochs=10, random_state=42, test_size=0.2, valid_size=0, save_model=False):
+    def train_with_epochs(self, X, y, epochs=10, random_state=42, test_size=0.2, valid_size=0, save_model=False, reduce_dim=False):
         if not self.__is_valid_input(X):
             raise TypeError("Input data must be a numpy array, pandas DataFrame, list, pandas Series, or Scipy Matrix.")
         
         self.__split_train_val_test(X, y, test_size=test_size, valid_size=valid_size, random_state=random_state)
 
+        if reduce_dim:
+            self.__reduce_dim(100)
+
         self.training_accuracies = []
         self.validation_accuracies = []
         self.epochs = range(1, epochs + 1)
 
-        for epoch in self.epochs:
-            if epoch % 5 == 0:
-                print(f"{self.model_name} begins epoch {epoch}")
-            try:
-                self.__fitting_model(self.X_train, self.y_train)
-            except TypeError:
-                self.X_train = self.X_train.toarray()
-                self.__fitting_model(self.X_train, self.y_train)
+        if isinstance(self.model, KNeighborsClassifier):
+            print("Skipping epochs training due to longevity.")
+            self.__fitting_model(self.X_train, self.y_train)
+
             y_pred_train = self.model.predict(self.X_train)
             train_accuracy = accuracy_score(self.y_train, y_pred_train)
-            self.training_accuracies.append(train_accuracy)
+            self.training_accuracies = [train_accuracy] * len(self.epochs)
             if valid_size != 0:
                 y_pred_val = self.model.predict(self.X_val)
                 val_accuracy = accuracy_score(self.y_val, y_pred_val)
-                self.validation_accuracies.append(val_accuracy)
+                self.validation_accuracies = [val_accuracy] * len(self.epochs)
+        else:
+            for epoch in self.epochs:
+                if epoch % 5 == 0:
+                    print(f"{self.model_name} begins epoch {epoch}")
+                try:
+                    self.__fitting_model(self.X_train, self.y_train)
+                except TypeError:
+                    self.X_train = self.X_train.toarray()
+                    self.__fitting_model(self.X_train, self.y_train)
+                y_pred_train = self.model.predict(self.X_train)
+                train_accuracy = accuracy_score(self.y_train, y_pred_train)
+                self.training_accuracies.append(train_accuracy)
+                if valid_size != 0:
+                    y_pred_val = self.model.predict(self.X_val)
+                    val_accuracy = accuracy_score(self.y_val, y_pred_val)
+                    self.validation_accuracies.append(val_accuracy)
 
         if save_model:
             try:
@@ -1085,220 +671,218 @@ class ClassificationModel:
         else:
             return int(total_combinations / 2) + 20
 
-class TransformerClassificationModel:
-    def __init__(self, data_input, model_checkpoint, x_features, y_feature):
-        self.model_checkpoint = model_checkpoint
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_checkpoint)
-        self.y_feature = y_feature
-        if isinstance(data_input, list):
-            self.dataset = Dataset.from_list(data_input)
-        elif isinstance(data_input, dict):
-            self.dataset = Dataset.from_dict(data_input)
-        elif isinstance(data_input, pd.DataFrame):
-            self.dataset = Dataset.from_pandas(data_input)
-        elif isinstance(data_input, str):
-            file_extension = os.path.splitext(data_input)[1]
-            if file_extension == ".csv":
-                df = pd.read_csv(data_input)
-                self.dataset = Dataset.from_csv(data_input)
-            elif file_extension == ".sql":
-                self.dataset = Dataset.from_sql(data_input)
-            else:
-                raise ValueError("The string input must refer to the file path.")
-            
-    def __set_label_encoder_decoder(self, features):
-        features = sorted(set(features))
-        self.__label2id = {label: i for i, label in enumerate(features)}
-        self.__id2label = {i: label for label, i in self.__label2id.items()}
-            
-    def set_model(self, y_feature):
-        self.__set_label_encoder_decoder(self.dataset[y_feature])
+class ClassificationModel2:
+    def __init__(self, X, y, dataset_name:str):
+        self.X = X
+        self.y = y
+        self.dataset_name = dataset_name
 
-        self.model = AutoModelForSequenceClassification.from_pretrained(
-            self.model_checkpoint,
-            id2label=self.__id2label,
-            label2id=self.__label2id
+    def split(self, test_size=0.1, valid_size=0.1, random_state=42):
+        if not 0 < test_size < 1:
+            raise ValueError("test_size must be between 0 and 1")
+        
+        if not 0 <= valid_size < 1:
+            raise ValueError("valid_size must be between 0 and 1")
+
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
+            self.X, self.y, test_size=test_size, random_state=random_state
         )
 
-    def train_test_val_split(self, test_size, valid_size=0, random_state=42):
-        if (valid_size < 0 or test_size < 0):
-            raise ValueError("Ratio must not be a negative number.")
-        if (test_size + valid_size) >= 1:
-            raise ValueError("Total ratio of testing and validation set must not larger or equal to 1.")
+        if valid_size > 0:
+            val_ratio = valid_size / (1 - test_size)
 
-        train_temp = self.dataset.train_test_split(test_size + valid_size, seed=random_state)
-        self.__train_set = train_temp["train"]
-
-        if valid_size != 0:
-            val_ratio = valid_size / (test_size + valid_size)
-
-            test_temp = train_temp["test"].train_test_split(val_ratio)
-            self.__validation_set = test_temp["train"]
-            self.__test_set = test_temp["test"]
-
-            self.dataset = DatasetDict({
-                "train": self.__train_set,
-                "validation": self.__validation_set,
-                "test": self.__test_set
-            })
-
-        else:
-            self.__test_set = train_temp["test"]
-
-            self.dataset = DatasetDict({
-                "train": self.__train_set,
-                "test": self.__test_set
-            })
-
-    def tokenizing(self, input_features:list[str]=None, merged_feature:str=None):
-        if input_features is not None and merged_feature is not None:
-            merge_preprocess_func = partial(
-                self.__merge_features,
-                input_features=input_features,
-                output_feature=merged_feature
+            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(
+                self.X_train, self.y_train, test_size=val_ratio, random_state=random_state
             )
 
-            self.dataset = self.dataset.map(merge_preprocess_func, batched=True)
+            print("Val size: ", self.X_test.shape)
+        
 
-        preprocess_func = partial(
-            self.__preprocess_function,
-            feature=merged_feature
-        )
+    def train_with_epochs(self, model:BaseEstimator, epochs, valid_size=0, save_model=False, reduce_dim=False):
+        if reduce_dim:
+            self.__reduce_dim(100)
 
-        self.dataset = self.dataset.map(preprocess_func)
+        training_accuracies = []
+        validation_accuracies = []
+        self.epochs = range(1, epochs + 1)
 
-        self.tokenized_dataset = self.dataset.rename_column(self.y_feature, "label")
+        if isinstance(model, (
+            KNeighborsClassifier,
+            AdaBoostClassifier,
+            XGBClassifier,
+            Perceptron,
+            PassiveAggressiveClassifier,
+            MultinomialNB,
+            BernoulliNB,
+            LinearSVC,
+        )):
+            print("Skipping epochs training due to longevity.")
+            model.fit(self.X_train, self.y_train)
 
-        print(self.tokenized_dataset["train"][0])
+            y_pred_train = model.predict(self.X_train)
+            train_accuracy = accuracy_score(self.y_train, y_pred_train)
+            training_accuracies = [train_accuracy] * len(self.epochs)
+            if valid_size != 0:
+                y_pred_val = model.predict(self.X_val)
+                val_accuracy = accuracy_score(self.y_val, y_pred_val)
+                validation_accuracies = [val_accuracy] * len(self.epochs)
+        elif isinstance(model, (
+                DecisionTreeClassifier,
+                RandomForestClassifier,
+                ExtraTreesClassifier
+            )):
+            try:
+                model.fit(self.X_train, self.y_train)
+            except TypeError:
+                self.X_train = self.X_train.toarray()
+                model.fit(self.X_train, self.y_train)
+            y_pred_train = model.predict(self.X_train)
+            train_accuracy = accuracy_score(self.y_train, y_pred_train)
+            training_accuracies = [train_accuracy] * len(self.epochs)
+            if valid_size != 0:
+                for epoch in self.epochs:
+                    y_pred_val = model.predict(self.X_val)
+                    val_accuracy = accuracy_score(self.y_val, y_pred_val)
+                    validation_accuracies.append(val_accuracy)
+        else:
+            for epoch in self.epochs:
+                if epoch % 5 == 0:
+                    print(f"{self.model_name} begins epoch {epoch}")
+                try:
+                    model.fit(self.X_train, self.y_train)
+                except TypeError:
+                    self.X_train = self.X_train.toarray()
+                    model.fit(self.X_train, self.y_train)
+                y_pred_train = model.predict(self.X_train)
+                train_accuracy = accuracy_score(self.y_train, y_pred_train)
+                training_accuracies.append(train_accuracy)
+                if valid_size != 0:
+                    y_pred_val = model.predict(self.X_val)
+                    val_accuracy = accuracy_score(self.y_val, y_pred_val)
+                    validation_accuracies.append(val_accuracy)
 
-    def train(self,
-              save_path,
-              batch_size=8,
-              epochs=20,
-              metric_monitor="accuracy",
-              epoch_limitation=3,
-              num_workers=4):
-        data_collator = DataCollatorWithPadding(self.tokenizer)
+        model_name = model.__class__.__name__
 
-        if not isinstance(self.tokenized_dataset["train"][0]["label"], int):
-            self.tokenized_dataset = self.tokenized_dataset.map(self.__encoder)
+        if save_model:
+            try:
+                self.__save_model(model, f"./models/normal/{model_name}_{self.dataset_name}_normal.joblib")
+            except Exception as e:
+                print(f"Error saving model: {e}")
+                trb.print_exc()
 
-        print(self.tokenized_dataset)
+        return training_accuracies, validation_accuracies
 
-        self.__training_args = TrainingArguments(
-            output_dir=save_path,
-            per_device_train_batch_size=batch_size,
-            per_device_eval_batch_size=batch_size,
-            num_train_epochs=epochs,
-            learning_rate=2e-5,
-            load_best_model_at_end=True,
-            metric_for_best_model=metric_monitor,
-            save_strategy="epoch",
-            evaluation_strategy="epoch",
-            logging_strategy="epoch",
-            weight_decay=0.01,
-            dataloader_num_workers=num_workers,
-            remove_unused_columns=True,
-            auto_find_batch_size=True
-        )
+    def train_and_evaluate_models(self,
+        epochs=10,
+        valid_size=0.15,
+        save_plot:bool=False,
+        plot_xlabel="Epochs",
+        plot_ylabel="Accuracy",
+        threading=True,
+        max_workers=3,
+        nomlp=False,
+        reduce_dim=False,
+    ):
+        metric_results = []
 
-        self.trainer = Trainer(
-            model=self.model,
-            args=self.__training_args,
-            train_dataset=self.tokenized_dataset["train"],
-            eval_dataset=self.tokenized_dataset["validation"],
-            compute_metrics=self.__compute_metrics,
-            callbacks=[EarlyStoppingCallback(early_stopping_patience=epoch_limitation)],
-            data_collator=data_collator
-        )
+        def __t_and_e(model):
+            print(f"Begin {model.__class__.__name__}")
+            training_accuracies, validation_accuracies = self.train_with_epochs(model, epochs, valid_size=valid_size, reduce_dim=reduce_dim)
+            print(f"{model.__class__.__name__} classification report")
+            self.plot_train_val_accuracy_after_epochs(
+                model, 
+                training_accuracies,
+                validation_accuracies,
+                xlabel=plot_xlabel, 
+                ylabel=plot_ylabel, 
+                save_plot=save_plot)
+            metrics = self.evaluate(model, detailed=True)
+            del model
+            metric_results.append(metrics)
+            print(metrics)
+            print("\n")
 
-        self.trainer.train()
+        models = get_classification_models(nomlp=nomlp)
+        if threading:
+            print("Threading avaiable")
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                executor.map(__t_and_e, models)
+        else:
+            for m in models:
+                __t_and_e(m)
 
-    def plot_training_validation_loss(self, xlabel="Epoch", ylabel="Loss"):
-        log_history = self.trainer.state.log_history
+        return metric_results
 
-        train_losses = []
-        val_losses = []
-        epochs = []
+    def plot_train_val_accuracy_after_epochs(
+            self, 
+            model:BaseEstimator,
+            training_accuracies:list,
+            validation_accuracies:list,
+            xlabel="X Label", 
+            ylabel="Y Label", 
+            save_plot=False):        
+        print(self.epochs)
+        print(len(training_accuracies))
+        print(len(validation_accuracies))
+        plt.figure(figsize=(10, 6))
+        plt.plot(
+            self.epochs, 
+            training_accuracies, 
+            color="blue", 
+            linestyle="--", 
+            linewidth=2, 
+            label="Training Accuracy")
+        if self.X_val is not None:
+            plt.plot(
+                self.epochs, 
+                validation_accuracies, 
+                color="red", 
+                linestyle="--", 
+                linewidth=2,
+                label="Validation Accuracy")
+            
+        model_name = model.__class__.__name__
 
-        for log in log_history:
-            if "loss" in log and "epoch" in log:
-                train_losses.append(log["loss"])
-                epochs.append(log["epoch"])
-            if "eval_loss" in log and "epoch" in log:
-                val_losses.append(log["eval_loss"])
-
-        plt.plot(epochs[:len(train_losses)], train_losses, label='Train Loss')
-        plt.plot(epochs[:len(val_losses)], val_losses, label='Validation Loss')
+        plt.title(f"Train-Val Accuracy Results for {model_name}")
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
-        plt.title(f'Training and Validation Loss of {self.model_checkpoint}')
-        plt.legend()
+        plt.grid(True, alpha=0.3)
+        if save_plot:
+            plt.savefig(f"./figs/normal/{model_name}_{self.dataset_name}_normal.jpg")
         plt.show()
 
-    def evaluate(self):
-        test_pred = self.trainer.predict(self.tokenized_dataset["test"])
+    def evaluate(self, model:BaseEstimator, detailed=False):
+        """
+        Evaluate the model using the test set and return the classification report.
+        Raises:
+        - EvaluateError: If the model has not been trained yet.
+        """
+        
+        y_pred = model.predict(self.X_test)
 
-        metrics = self.__compute_metrics(test_pred)
+        self.confusion_matrix = confusion_matrix(self.y_test, y_pred)
+        if detailed:
+            self.metrics = {
+                "accuracy": accuracy_score(self.y_test, y_pred),
+                "weighted_precision": precision_score(self.y_test, y_pred, average='weighted'),
+                "wighted_recall": recall_score(self.y_test, y_pred, average='weighted'),
+                "weighted_f1": f1_score(self.y_test, y_pred, average='weighted'),
+                "macro_precision": precision_score(self.y_test, y_pred, average='macro'),
+                "macro_recall": recall_score(self.y_test, y_pred, average='macro'),
+                "macro_f1": f1_score(self.y_test, y_pred, average='macro'),
+                "roc_auc": roc_auc_score(self.y_test, y_pred)
+            }
+            detailed_metrics = {
+                "dataset": self.dataset_name,
+                "model": model.__class__.__name__,
+                "metrics": self.metrics,
+                "confusion_matrix": self.confusion_matrix
+            }
+            if hasattr(self, "epochs"):
+                detailed_metrics["epochs"] = len(self.epochs)
 
-        return metrics
-
-    def __merge_features(
-            self, 
-            example, 
-            input_features:list[str]|tuple[str], 
-            output_feature:str):
-        merged_features = []
-
-        if len(input_features) == 2:
-            for feature1, feature2 in zip(
-                example[input_features[0]], 
-                example[input_features[1]]
-            ):
-                merged = f"{feature1} [SEP] {feature2}"
-                merged_features.append(merged)
-        elif len(input_features) == 3:
-            for feature1, feature2, feature3 in zip(
-                example[input_features[0]], 
-                example[input_features[1]],
-                example[input_features[2]]
-            ):
-                merged = f"{feature1} [SEP] {feature2} [SEP] {feature3}"
-                merged_features.append(merged)
-        elif len(input_features) == 4:
-            for feature1, feature2, feature3, feature4 in zip(
-                example[input_features[0]], 
-                example[input_features[1]],
-                example[input_features[2]],
-                example[input_features[3]]
-            ):
-                merged = f"{feature1} [SEP] {feature2} [SEP] {feature3} [SEP] {feature4}"
-                merged_features.append(merged)
-        example[output_feature] = merged_features
-        return example
-
-    def __preprocess_function(self, examples, feature):
-        return self.tokenizer(examples[feature], truncation=True, padding=True)
-    
-    def __encoder(self, example):
-        example["label"] = self.__label2id[example["label"]]
-        return example
-    
-    def __compute_metrics(self, pred:PredictionOutput):
-        logits = pred.predictions
-        labels = pred.label_ids
-
-        preds = np.argmax(logits, axis=1)
-        return {
-            "accuracy": accuracy_score(labels, preds),
-            "weighted_precision": precision_score(labels, preds, average='weighted'),
-            "wighted_recall": recall_score(labels, preds, average='weighted'),
-            "weighted_f1": f1_score(labels, preds, average='weighted'),
-            "macro_precision": precision_score(labels, preds, average='macro'),
-            "macro_recall": recall_score(labels, preds, average='macro'),
-            "macro_f1": f1_score(labels, preds, average='macro'),
-            "roc_auc": roc_auc_score(labels, preds)
-        }
+            return detailed_metrics
+        return classification_report(self.y_test, y_pred)
 
 def add_to_json_array(filename, new_object, array_key=None, mode="overwrite"):
     if mode != "overwrite":
@@ -1336,7 +920,9 @@ def train_and_evaluate_models(
         plot_xlabel="Epochs",
         plot_ylabel="Accuracy",
         threading=True,
-        max_workers=3
+        max_workers=3,
+        nomlp=False,
+        reduce_dim=False,
     ):
 
     def __t_and_e(
@@ -1358,7 +944,7 @@ def train_and_evaluate_models(
         print(f"Begin {model.__class__.__name__}")
         classification_model = ClassificationModel(model, dataset_name)
         if mode.lower() == "epochs":
-            classification_model.train_with_epochs(X, y, epochs=epochs, save_model=True, test_size=test_size, valid_size=valid_size)
+            classification_model.train_with_epochs(X, y, epochs=epochs, save_model=True, test_size=test_size, valid_size=valid_size, reduce_dim=reduce_dim)
             print(f"{model.__class__.__name__} classification report")
             classification_model.plot_train_val_accuracy_after_epochs(xlabel=plot_xlabel, ylabel=plot_ylabel, save_plot=save_plot)
         elif mode.lower() == "best":
@@ -1371,6 +957,7 @@ def train_and_evaluate_models(
         else:
             raise ValueError("Unknown mode. The avaiable modes are 'epochs', 'best', and 'normal'")
         metrics = classification_model.evaluate(detailed=True)
+        del classification_model, model
         metric_results.append(metrics)
         print(metrics)
         print("\n")
@@ -1389,11 +976,11 @@ def train_and_evaluate_models(
         valid_size=valid_size,
         save_plot=save_plot,
         plot_xlabel=plot_xlabel,
-        plot_ylabel=plot_ylabel
+        plot_ylabel=plot_ylabel,
     )
 
     if model is None:
-        models = get_classification_models(X)
+        models = get_classification_models(X, nomlp=nomlp)
         if threading:
             print("Threading avaiable")
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -1401,5 +988,6 @@ def train_and_evaluate_models(
         else:
             for m in models:
                 train_eval(m)
+            
     else:
         train_eval(model)

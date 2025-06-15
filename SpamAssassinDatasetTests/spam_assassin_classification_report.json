@@ -1,34 +1,7 @@
 [
     {
-        "dataset": "spam_assassin_stemming_countvec",
-        "model": "Bernoulli Naive Bayes",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9404761904761905,
-            "weighted_precision": 0.9419603174603175,
-            "wighted_recall": 0.9404761904761905,
-            "weighted_f1": 0.9393753470179577,
-            "macro_precision": 0.9483333333333334,
-            "macro_recall": 0.9162905264243894,
-            "macro_f1": 0.9299210443766643,
-            "roc_auc": 0.9162905264243892
-        },
-        "confusion_matrix": [
-            [
-                279,
-                4
-            ],
-            [
-                21,
-                116
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_stemming_countvec",
-        "model": "Multinomial Naive Bayes",
-        "type": "normal",
+        "dataset": "spam_assassin_stemmed_countvec",
+        "model": "MultinomialNB",
         "metrics": {
             "accuracy": 0.9571428571428572,
             "weighted_precision": 0.9572555018970748,
@@ -52,113 +25,33 @@
         "epochs": 10
     },
     {
-        "dataset": "spam_assassin_stemming_countvec",
-        "model": "Decision Tree",
-        "type": "normal",
+        "dataset": "spam_assassin_stemmed_countvec",
+        "model": "BernoulliNB",
         "metrics": {
-            "accuracy": 0.9428571428571428,
-            "weighted_precision": 0.9431160917732514,
-            "wighted_recall": 0.9428571428571428,
-            "weighted_f1": 0.9429628650720233,
-            "macro_precision": 0.9336644563352876,
-            "macro_recall": 0.9368858167186815,
-            "macro_f1": 0.9352451433857539,
-            "roc_auc": 0.9368858167186814
+            "accuracy": 0.9404761904761905,
+            "weighted_precision": 0.9419603174603175,
+            "wighted_recall": 0.9404761904761905,
+            "weighted_f1": 0.9393753470179577,
+            "macro_precision": 0.9483333333333334,
+            "macro_recall": 0.9162905264243894,
+            "macro_f1": 0.9299210443766643,
+            "roc_auc": 0.9162905264243892
         },
         "confusion_matrix": [
             [
-                270,
-                13
+                279,
+                4
             ],
             [
-                11,
-                126
+                21,
+                116
             ]
         ],
         "epochs": 10
     },
     {
-        "dataset": "spam_assassin_stemming_countvec",
-        "model": "AdaBoost",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9428571428571428,
-            "weighted_precision": 0.9426171546301503,
-            "wighted_recall": 0.9428571428571428,
-            "weighted_f1": 0.9425171843082291,
-            "macro_precision": 0.9396972978684064,
-            "macro_recall": 0.9293544143818834,
-            "macro_f1": 0.934244859617994,
-            "roc_auc": 0.9293544143818833
-        },
-        "confusion_matrix": [
-            [
-                274,
-                9
-            ],
-            [
-                15,
-                122
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_stemming_countvec",
-        "model": "Logistic Regression",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9857142857142858,
-            "weighted_precision": 0.9857105727281167,
-            "wighted_recall": 0.9857142857142858,
-            "weighted_f1": 0.9856869156113148,
-            "macro_precision": 0.9855750487329434,
-            "macro_recall": 0.981867890949421,
-            "macro_f1": 0.9836888980944489,
-            "roc_auc": 0.981867890949421
-        },
-        "confusion_matrix": [
-            [
-                281,
-                2
-            ],
-            [
-                4,
-                133
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_stemming_countvec",
-        "model": "K-nearest Neighbors",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.8214285714285714,
-            "weighted_precision": 0.8715093494932716,
-            "wighted_recall": 0.8214285714285714,
-            "weighted_f1": 0.8269642762515423,
-            "macro_precision": 0.8152647833590698,
-            "macro_recall": 0.858076913156741,
-            "macro_f1": 0.8145302315722538,
-            "roc_auc": 0.858076913156741
-        },
-        "confusion_matrix": [
-            [
-                213,
-                70
-            ],
-            [
-                5,
-                132
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_stemming_countvec",
-        "model": "Stochastic Gradient Descent",
-        "type": "normal",
+        "dataset": "spam_assassin_stemmed_countvec",
+        "model": "LinearSVC",
         "metrics": {
             "accuracy": 0.9738095238095238,
             "weighted_precision": 0.9737711293681444,
@@ -182,9 +75,58 @@
         "epochs": 10
     },
     {
-        "dataset": "spam_assassin_stemming_countvec",
+        "dataset": "spam_assassin_stemmed_countvec",
+        "model": "KNeighborsClassifier",
+        "metrics": {
+            "accuracy": 0.8214285714285714,
+            "weighted_precision": 0.8715093494932716,
+            "wighted_recall": 0.8214285714285714,
+            "weighted_f1": 0.8269642762515423,
+            "macro_precision": 0.8152647833590698,
+            "macro_recall": 0.858076913156741,
+            "macro_f1": 0.8145302315722538,
+            "roc_auc": 0.858076913156741
+        },
+        "confusion_matrix": [
+            [
+                213,
+                70
+            ],
+            [
+                5,
+                132
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "spam_assassin_stemmed_countvec",
+        "model": "DecisionTreeClassifier",
+        "metrics": {
+            "accuracy": 0.9357142857142857,
+            "weighted_precision": 0.9353835978835978,
+            "wighted_recall": 0.9357142857142857,
+            "weighted_f1": 0.9353982959338464,
+            "macro_precision": 0.9305555555555556,
+            "macro_recall": 0.9221712104407933,
+            "macro_f1": 0.9261713943450153,
+            "roc_auc": 0.9221712104407934
+        },
+        "confusion_matrix": [
+            [
+                272,
+                11
+            ],
+            [
+                16,
+                121
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "spam_assassin_stemmed_countvec",
         "model": "Perceptron",
-        "type": "normal",
         "metrics": {
             "accuracy": 0.9714285714285714,
             "weighted_precision": 0.9715836481805912,
@@ -208,18 +150,17 @@
         "epochs": 10
     },
     {
-        "dataset": "spam_assassin_stemming_countvec",
-        "model": "Passive-Aggressive",
-        "type": "normal",
+        "dataset": "spam_assassin_stemmed_countvec",
+        "model": "PassiveAggressiveClassifier",
         "metrics": {
-            "accuracy": 0.9642857142857143,
-            "weighted_precision": 0.9642302343472601,
-            "wighted_recall": 0.9642857142857143,
-            "weighted_f1": 0.964251797585131,
-            "macro_precision": 0.9601801988400994,
-            "macro_recall": 0.9584354285419514,
-            "macro_f1": 0.9592999592999594,
-            "roc_auc": 0.9584354285419515
+            "accuracy": 0.9619047619047619,
+            "weighted_precision": 0.9618082242643646,
+            "wighted_recall": 0.9619047619047619,
+            "weighted_f1": 0.9618317749635065,
+            "macro_precision": 0.9582846003898635,
+            "macro_recall": 0.9547857935054551,
+            "macro_f1": 0.956503728251864,
+            "roc_auc": 0.9547857935054551
         },
         "confusion_matrix": [
             [
@@ -227,68 +168,90 @@
                 7
             ],
             [
-                8,
-                129
+                9,
+                128
             ]
         ],
         "epochs": 10
     },
     {
-        "dataset": "spam_assassin_stemming_countvec",
-        "model": "Random Forest",
-        "type": "normal",
+        "dataset": "spam_assassin_stemmed_countvec",
+        "model": "RandomForestClassifier",
         "metrics": {
-            "accuracy": 0.9880952380952381,
-            "weighted_precision": 0.9880853749950684,
-            "wighted_recall": 0.9880952380952381,
-            "weighted_f1": 0.9880839325283769,
-            "macro_precision": 0.9873653686826844,
-            "macro_recall": 0.9855175259859172,
-            "macro_f1": 0.986433319766653,
-            "roc_auc": 0.9855175259859172
+            "accuracy": 0.9809523809523809,
+            "weighted_precision": 0.9809523809523809,
+            "wighted_recall": 0.9809523809523809,
+            "weighted_f1": 0.9809523809523809,
+            "macro_precision": 0.9783343220448273,
+            "macro_recall": 0.9783343220448273,
+            "macro_f1": 0.9783343220448273,
+            "roc_auc": 0.9783343220448273
         },
         "confusion_matrix": [
             [
-                281,
-                2
+                279,
+                4
             ],
             [
-                3,
-                134
+                4,
+                133
             ]
         ],
         "epochs": 10
     },
     {
-        "dataset": "spam_assassin_stemming_countvec",
-        "model": "SVM",
-        "type": "normal",
+        "dataset": "spam_assassin_stemmed_countvec",
+        "model": "AdaBoostClassifier",
         "metrics": {
-            "accuracy": 0.9285714285714286,
-            "weighted_precision": 0.9330655204441611,
-            "wighted_recall": 0.9285714285714286,
-            "weighted_f1": 0.926395721758625,
-            "macro_precision": 0.9456835476252952,
-            "macro_recall": 0.8942766500735085,
-            "macro_f1": 0.9141782911944202,
-            "roc_auc": 0.8942766500735085
+            "accuracy": 0.9428571428571428,
+            "weighted_precision": 0.9426171546301503,
+            "wighted_recall": 0.9428571428571428,
+            "weighted_f1": 0.9425171843082291,
+            "macro_precision": 0.9396972978684064,
+            "macro_recall": 0.9293544143818834,
+            "macro_f1": 0.934244859617994,
+            "roc_auc": 0.9293544143818833
         },
         "confusion_matrix": [
             [
-                281,
-                2
+                274,
+                9
             ],
             [
-                28,
-                109
+                15,
+                122
             ]
         ],
         "epochs": 10
     },
     {
-        "dataset": "spam_assassin_stemming_countvec",
-        "model": "XGBoost Classifier",
-        "type": "normal",
+        "dataset": "spam_assassin_stemmed_countvec",
+        "model": "ExtraTreesClassifier",
+        "metrics": {
+            "accuracy": 0.9761904761904762,
+            "weighted_precision": 0.9762079414564284,
+            "wighted_recall": 0.9761904761904762,
+            "weighted_f1": 0.9760976515362481,
+            "macro_precision": 0.9765266825600587,
+            "macro_recall": 0.969152201387635,
+            "macro_f1": 0.97270955165692,
+            "roc_auc": 0.9691522013876351
+        },
+        "confusion_matrix": [
+            [
+                280,
+                3
+            ],
+            [
+                7,
+                130
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "spam_assassin_stemmed_countvec",
+        "model": "XGBClassifier",
         "metrics": {
             "accuracy": 0.9714285714285714,
             "weighted_precision": 0.9714285714285714,
@@ -312,61 +275,8 @@
         "epochs": 10
     },
     {
-        "dataset": "spam_assassin_stemming_countvec",
-        "model": "Extra Trees Classifier",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9833333333333333,
-            "weighted_precision": 0.9834911616161616,
-            "wighted_recall": 0.9833333333333333,
-            "weighted_f1": 0.9832514100569232,
-            "macro_precision": 0.9857954545454546,
-            "macro_recall": 0.9763354053287251,
-            "macro_f1": 0.9808592503857447,
-            "roc_auc": 0.9763354053287251
-        },
-        "confusion_matrix": [
-            [
-                282,
-                1
-            ],
-            [
-                6,
-                131
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_stemming_countvec",
-        "model": "Multi-layer Perceptron",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9809523809523809,
-            "weighted_precision": 0.9814760268368515,
-            "wighted_recall": 0.9809523809523809,
-            "weighted_f1": 0.9807986866120003,
-            "macro_precision": 0.9862542955326461,
-            "macro_recall": 0.9708029197080292,
-            "macro_f1": 0.977993764900055,
-            "roc_auc": 0.9708029197080292
-        },
-        "confusion_matrix": [
-            [
-                283,
-                0
-            ],
-            [
-                8,
-                129
-            ]
-        ],
-        "epochs": 10
-    },
-    {
         "dataset": "spam_assassin_stemmed_tfidf",
-        "model": "Multinomial Naive Bayes",
-        "type": "normal",
+        "model": "MultinomialNB",
         "metrics": {
             "accuracy": 0.9571428571428572,
             "weighted_precision": 0.9575306073088985,
@@ -379,20 +289,44 @@
         },
         "confusion_matrix": [
             [
-                279,
-                4
+                281,
+                2
             ],
             [
-                14,
-                123
+                12,
+                125
             ]
         ],
         "epochs": 10
     },
     {
         "dataset": "spam_assassin_stemmed_tfidf",
-        "model": "Bernoulli Naive Bayes",
-        "type": "normal",
+        "model": "LinearSVC",
+        "metrics": {
+            "accuracy": 0.9666666666666667,
+            "weighted_precision": 0.9672668476167441,
+            "wighted_recall": 0.9666666666666667,
+            "weighted_f1": 0.9663247053872055,
+            "macro_precision": 0.9716481685523097,
+            "macro_recall": 0.9526708106574502,
+            "macro_f1": 0.9613320707070707,
+            "roc_auc": 0.9526708106574502
+        },
+        "confusion_matrix": [
+            [
+                281,
+                2
+            ],
+            [
+                12,
+                125
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "spam_assassin_stemmed_tfidf",
+        "model": "BernoulliNB",
         "metrics": {
             "accuracy": 0.9404761904761905,
             "weighted_precision": 0.9419603174603175,
@@ -417,34 +351,32 @@
     },
     {
         "dataset": "spam_assassin_stemmed_tfidf",
-        "model": "Decision Tree",
-        "type": "normal",
+        "model": "DecisionTreeClassifier",
         "metrics": {
-            "accuracy": 0.9380952380952381,
-            "weighted_precision": 0.9380952380952381,
-            "wighted_recall": 0.9380952380952381,
-            "weighted_f1": 0.9380952380952381,
-            "macro_precision": 0.9295865466456887,
-            "macro_recall": 0.9295865466456887,
-            "macro_f1": 0.9295865466456887,
-            "roc_auc": 0.9295865466456887
+            "accuracy": 0.9333333333333333,
+            "weighted_precision": 0.9340044230915885,
+            "wighted_recall": 0.9333333333333333,
+            "weighted_f1": 0.9335757017162071,
+            "macro_precision": 0.9217570350034316,
+            "macro_recall": 0.9279358283252948,
+            "macro_f1": 0.9247292557413145,
+            "roc_auc": 0.9279358283252948
         },
         "confusion_matrix": [
             [
-                270,
-                13
+                267,
+                16
             ],
             [
-                13,
-                124
+                12,
+                125
             ]
         ],
         "epochs": 10
     },
     {
         "dataset": "spam_assassin_stemmed_tfidf",
-        "model": "Random Forest",
-        "type": "normal",
+        "model": "RandomForestClassifier",
         "metrics": {
             "accuracy": 0.9833333333333333,
             "weighted_precision": 0.9833515986501062,
@@ -469,8 +401,57 @@
     },
     {
         "dataset": "spam_assassin_stemmed_tfidf",
-        "model": "AdaBoost",
-        "type": "normal",
+        "model": "Perceptron",
+        "metrics": {
+            "accuracy": 0.9761904761904762,
+            "weighted_precision": 0.9761904761904762,
+            "wighted_recall": 0.9761904761904762,
+            "weighted_f1": 0.9761904761904762,
+            "macro_precision": 0.9729179025560342,
+            "macro_recall": 0.9729179025560342,
+            "macro_f1": 0.9729179025560342,
+            "roc_auc": 0.9729179025560343
+        },
+        "confusion_matrix": [
+            [
+                278,
+                5
+            ],
+            [
+                5,
+                132
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "spam_assassin_stemmed_tfidf",
+        "model": "PassiveAggressiveClassifier",
+        "metrics": {
+            "accuracy": 0.9714285714285714,
+            "weighted_precision": 0.9717878168609407,
+            "wighted_recall": 0.9714285714285714,
+            "weighted_f1": 0.9711980299180005,
+            "macro_precision": 0.9750659314313115,
+            "macro_recall": 0.9599700807304428,
+            "macro_f1": 0.9669906473500824,
+            "roc_auc": 0.9599700807304428
+        },
+        "confusion_matrix": [
+            [
+                281,
+                2
+            ],
+            [
+                10,
+                127
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "spam_assassin_stemmed_tfidf",
+        "model": "AdaBoostClassifier",
         "metrics": {
             "accuracy": 0.9476190476190476,
             "weighted_precision": 0.9474059713744291,
@@ -495,164 +476,7 @@
     },
     {
         "dataset": "spam_assassin_stemmed_tfidf",
-        "model": "Logistic Regression",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9547619047619048,
-            "weighted_precision": 0.9568531746031746,
-            "wighted_recall": 0.9547619047619048,
-            "weighted_f1": 0.9539252637336479,
-            "macro_precision": 0.9658333333333333,
-            "macro_recall": 0.9325397848907688,
-            "macro_f1": 0.946739993726265,
-            "roc_auc": 0.9325397848907688
-        },
-        "confusion_matrix": [
-            [
-                282,
-                1
-            ],
-            [
-                18,
-                119
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_stemmed_tfidf",
-        "model": "Stochastic Gradient Descent",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.969047619047619,
-            "weighted_precision": 0.9695200383235486,
-            "wighted_recall": 0.969047619047619,
-            "weighted_f1": 0.9687642486034611,
-            "macro_precision": 0.9733518835616438,
-            "macro_recall": 0.9563204456939465,
-            "macro_f1": 0.9641673502871206,
-            "roc_auc": 0.9563204456939464
-        },
-        "confusion_matrix": [
-            [
-                281,
-                2
-            ],
-            [
-                11,
-                126
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_stemmed_tfidf",
-        "model": "Perceptron",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9761904761904762,
-            "weighted_precision": 0.9761904761904762,
-            "wighted_recall": 0.9761904761904762,
-            "weighted_f1": 0.9761904761904762,
-            "macro_precision": 0.9729179025560342,
-            "macro_recall": 0.9729179025560342,
-            "macro_f1": 0.9729179025560342,
-            "roc_auc": 0.9729179025560343
-        },
-        "confusion_matrix": [
-            [
-                278,
-                5
-            ],
-            [
-                5,
-                132
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_stemmed_tfidf",
-        "model": "Passive-Aggressive",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9738095238095238,
-            "weighted_precision": 0.9743759682811481,
-            "wighted_recall": 0.9738095238095238,
-            "weighted_f1": 0.9735697488183132,
-            "macro_precision": 0.9789704623287672,
-            "macro_recall": 0.9617368651827396,
-            "macro_f1": 0.9696800656275635,
-            "roc_auc": 0.9617368651827396
-        },
-        "confusion_matrix": [
-            [
-                282,
-                1
-            ],
-            [
-                10,
-                127
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_stemmed_tfidf",
-        "model": "SVM",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9738095238095238,
-            "weighted_precision": 0.9747894395853579,
-            "wighted_recall": 0.9738095238095238,
-            "weighted_f1": 0.9735114634845113,
-            "macro_precision": 0.9812925170068028,
-            "macro_recall": 0.9598540145985401,
-            "macro_f1": 0.9695553900798017,
-            "roc_auc": 0.9598540145985401
-        },
-        "confusion_matrix": [
-            [
-                283,
-                0
-            ],
-            [
-                11,
-                126
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_stemmed_tfidf",
-        "model": "K-nearest Neighbors",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.5261904761904762,
-            "weighted_precision": 0.8068098072562359,
-            "wighted_recall": 0.5261904761904762,
-            "weighted_f1": 0.4974028717200887,
-            "macro_precision": 0.7038690476190477,
-            "macro_recall": 0.6484098939929328,
-            "macro_f1": 0.5185234257536393,
-            "roc_auc": 0.6484098939929328
-        },
-        "confusion_matrix": [
-            [
-                84,
-                199
-            ],
-            [
-                0,
-                137
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_stemmed_tfidf",
-        "model": "Extra Trees Classifier",
-        "type": "normal",
+        "model": "ExtraTreesClassifier",
         "metrics": {
             "accuracy": 0.9857142857142858,
             "weighted_precision": 0.9860108749382106,
@@ -677,8 +501,32 @@
     },
     {
         "dataset": "spam_assassin_stemmed_tfidf",
-        "model": "XGBoost Classifier",
-        "type": "normal",
+        "model": "KNeighborsClassifier",
+        "metrics": {
+            "accuracy": 0.5261904761904762,
+            "weighted_precision": 0.8068098072562359,
+            "wighted_recall": 0.5261904761904762,
+            "weighted_f1": 0.4974028717200887,
+            "macro_precision": 0.7038690476190477,
+            "macro_recall": 0.6484098939929328,
+            "macro_f1": 0.5185234257536393,
+            "roc_auc": 0.6484098939929328
+        },
+        "confusion_matrix": [
+            [
+                84,
+                199
+            ],
+            [
+                0,
+                137
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "spam_assassin_stemmed_tfidf",
+        "model": "XGBClassifier",
         "metrics": {
             "accuracy": 0.9738095238095238,
             "weighted_precision": 0.9737722906063834,
@@ -702,35 +550,8 @@
         "epochs": 10
     },
     {
-        "dataset": "spam_assassin_stemmed_tfidf",
-        "model": "Multi-layer Perceptron",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9904761904761905,
-            "weighted_precision": 0.9906089264974282,
-            "wighted_recall": 0.9904761904761905,
-            "weighted_f1": 0.9904390606144992,
-            "macro_precision": 0.9930313588850175,
-            "macro_recall": 0.9854014598540146,
-            "macro_f1": 0.989083820662768,
-            "roc_auc": 0.9854014598540146
-        },
-        "confusion_matrix": [
-            [
-                283,
-                0
-            ],
-            [
-                4,
-                133
-            ]
-        ],
-        "epochs": 10
-    },
-    {
         "dataset": "spam_assassin_lemmatized_countvec",
-        "model": "Multinomial Naive Bayes",
-        "type": "normal",
+        "model": "MultinomialNB",
         "metrics": {
             "accuracy": 0.9595238095238096,
             "weighted_precision": 0.9598081784083496,
@@ -755,8 +576,7 @@
     },
     {
         "dataset": "spam_assassin_lemmatized_countvec",
-        "model": "Bernoulli Naive Bayes",
-        "type": "normal",
+        "model": "BernoulliNB",
         "metrics": {
             "accuracy": 0.9404761904761905,
             "weighted_precision": 0.9419603174603175,
@@ -781,121 +601,16 @@
     },
     {
         "dataset": "spam_assassin_lemmatized_countvec",
-        "model": "Decision Tree",
-        "type": "normal",
+        "model": "LinearSVC",
         "metrics": {
-            "accuracy": 0.9476190476190476,
-            "weighted_precision": 0.9476190476190476,
-            "wighted_recall": 0.9476190476190476,
-            "weighted_f1": 0.9476190476190476,
-            "macro_precision": 0.9404193856232751,
-            "macro_recall": 0.9404193856232751,
-            "macro_f1": 0.9404193856232751,
-            "roc_auc": 0.9404193856232751
-        },
-        "confusion_matrix": [
-            [
-                272,
-                11
-            ],
-            [
-                11,
-                126
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_lemmatized_countvec",
-        "model": "AdaBoost",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9404761904761905,
-            "weighted_precision": 0.9403844585779517,
-            "wighted_recall": 0.9404761904761905,
-            "weighted_f1": 0.9399312473143482,
-            "macro_precision": 0.939640410958904,
-            "macro_recall": 0.9238219287611875,
-            "macro_f1": 0.9310910582444627,
-            "roc_auc": 0.9238219287611875
-        },
-        "confusion_matrix": [
-            [
-                275,
-                8
-            ],
-            [
-                17,
-                120
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_lemmatized_countvec",
-        "model": "Logistic Regression",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9857142857142858,
-            "weighted_precision": 0.9857105727281167,
-            "wighted_recall": 0.9857142857142858,
-            "weighted_f1": 0.9856869156113148,
-            "macro_precision": 0.9855750487329434,
-            "macro_recall": 0.981867890949421,
-            "macro_f1": 0.9836888980944489,
-            "roc_auc": 0.981867890949421
-        },
-        "confusion_matrix": [
-            [
-                281,
-                2
-            ],
-            [
-                4,
-                133
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_lemmatized_countvec",
-        "model": "Random Forest",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9785714285714285,
-            "weighted_precision": 0.9785613640091253,
-            "wighted_recall": 0.9785714285714285,
-            "weighted_f1": 0.9785093103253403,
-            "macro_precision": 0.9783164596597433,
-            "macro_recall": 0.9728018364241315,
-            "macro_f1": 0.9754862223490425,
-            "roc_auc": 0.9728018364241315
-        },
-        "confusion_matrix": [
-            [
-                280,
-                3
-            ],
-            [
-                6,
-                131
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_lemmatized_countvec",
-        "model": "Stochastic Gradient Descent",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9761904761904762,
-            "weighted_precision": 0.9761904761904762,
-            "wighted_recall": 0.9761904761904762,
-            "weighted_f1": 0.9761904761904762,
-            "macro_precision": 0.9729179025560342,
-            "macro_recall": 0.9729179025560342,
-            "macro_f1": 0.9729179025560342,
-            "roc_auc": 0.9729179025560343
+            "accuracy": 0.969047619047619,
+            "weighted_precision": 0.9689808947271634,
+            "wighted_recall": 0.969047619047619,
+            "weighted_f1": 0.968957892692158,
+            "macro_precision": 0.9673572695960755,
+            "macro_recall": 0.9619689974465451,
+            "macro_f1": 0.964591210059728,
+            "roc_auc": 0.9619689974465452
         },
         "confusion_matrix": [
             [
@@ -903,68 +618,15 @@
                 5
             ],
             [
-                5,
-                132
+                8,
+                129
             ]
         ],
         "epochs": 10
     },
     {
         "dataset": "spam_assassin_lemmatized_countvec",
-        "model": "Perceptron",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9738095238095238,
-            "weighted_precision": 0.9738708280105135,
-            "wighted_recall": 0.9738095238095238,
-            "weighted_f1": 0.9738339654445849,
-            "macro_precision": 0.9693956213382671,
-            "macro_recall": 0.9711511181037373,
-            "macro_f1": 0.9702654867256637,
-            "roc_auc": 0.9711511181037373
-        },
-        "confusion_matrix": [
-            [
-                277,
-                6
-            ],
-            [
-                5,
-                132
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_lemmatized_countvec",
-        "model": "Passive-Aggressive",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9595238095238096,
-            "weighted_precision": 0.9594373797498799,
-            "wighted_recall": 0.9595238095238096,
-            "weighted_f1": 0.9593248529953847,
-            "macro_precision": 0.9581755050505051,
-            "macro_recall": 0.9492533078847591,
-            "macro_f1": 0.95351532236538,
-            "roc_auc": 0.9492533078847591
-        },
-        "confusion_matrix": [
-            [
-                277,
-                6
-            ],
-            [
-                11,
-                126
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_lemmatized_countvec",
-        "model": "K-nearest Neighbors",
-        "type": "normal",
+        "model": "KNeighborsClassifier",
         "metrics": {
             "accuracy": 0.8,
             "weighted_precision": 0.8672490073737947,
@@ -989,34 +651,157 @@
     },
     {
         "dataset": "spam_assassin_lemmatized_countvec",
-        "model": "SVM",
-        "type": "normal",
+        "model": "DecisionTreeClassifier",
         "metrics": {
-            "accuracy": 0.9261904761904762,
-            "weighted_precision": 0.9321903405236739,
-            "wighted_recall": 0.9261904761904762,
-            "weighted_f1": 0.9236208769221974,
-            "macro_precision": 0.9472934472934473,
-            "macro_recall": 0.8887441644528127,
-            "macro_f1": 0.9106842737094838,
-            "roc_auc": 0.8887441644528127
+            "accuracy": 0.9428571428571428,
+            "weighted_precision": 0.9428571428571428,
+            "wighted_recall": 0.9428571428571428,
+            "weighted_f1": 0.9428571428571428,
+            "macro_precision": 0.935002966134482,
+            "macro_recall": 0.935002966134482,
+            "macro_f1": 0.935002966134482,
+            "roc_auc": 0.935002966134482
         },
         "confusion_matrix": [
             [
-                282,
-                1
+                271,
+                12
             ],
             [
-                30,
-                107
+                12,
+                125
             ]
         ],
         "epochs": 10
     },
     {
         "dataset": "spam_assassin_lemmatized_countvec",
-        "model": "XGBoost Classifier",
-        "type": "normal",
+        "model": "Perceptron",
+        "metrics": {
+            "accuracy": 0.9738095238095238,
+            "weighted_precision": 0.9738708280105135,
+            "wighted_recall": 0.9738095238095238,
+            "weighted_f1": 0.9738339654445849,
+            "macro_precision": 0.9693956213382671,
+            "macro_recall": 0.9711511181037373,
+            "macro_f1": 0.9702654867256637,
+            "roc_auc": 0.9711511181037373
+        },
+        "confusion_matrix": [
+            [
+                277,
+                6
+            ],
+            [
+                5,
+                132
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "spam_assassin_lemmatized_countvec",
+        "model": "RandomForestClassifier",
+        "metrics": {
+            "accuracy": 0.9809523809523809,
+            "weighted_precision": 0.9809301030353662,
+            "wighted_recall": 0.9809523809523809,
+            "weighted_f1": 0.9809158874817532,
+            "macro_precision": 0.9801169590643275,
+            "macro_recall": 0.9764514714606278,
+            "macro_f1": 0.9782518641259321,
+            "roc_auc": 0.9764514714606279
+        },
+        "confusion_matrix": [
+            [
+                280,
+                3
+            ],
+            [
+                5,
+                132
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "spam_assassin_lemmatized_countvec",
+        "model": "PassiveAggressiveClassifier",
+        "metrics": {
+            "accuracy": 0.9666666666666667,
+            "weighted_precision": 0.9674593757626249,
+            "wighted_recall": 0.9666666666666667,
+            "weighted_f1": 0.9668452380952383,
+            "macro_precision": 0.9578147484284669,
+            "macro_recall": 0.9677336153310464,
+            "macro_f1": 0.9625,
+            "roc_auc": 0.9677336153310464
+        },
+        "confusion_matrix": [
+            [
+                273,
+                10
+            ],
+            [
+                4,
+                133
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "spam_assassin_lemmatized_countvec",
+        "model": "AdaBoostClassifier",
+        "metrics": {
+            "accuracy": 0.9404761904761905,
+            "weighted_precision": 0.9403844585779517,
+            "wighted_recall": 0.9404761904761905,
+            "weighted_f1": 0.9399312473143482,
+            "macro_precision": 0.939640410958904,
+            "macro_recall": 0.9238219287611875,
+            "macro_f1": 0.9310910582444627,
+            "roc_auc": 0.9238219287611875
+        },
+        "confusion_matrix": [
+            [
+                275,
+                8
+            ],
+            [
+                17,
+                120
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "spam_assassin_lemmatized_countvec",
+        "model": "ExtraTreesClassifier",
+        "metrics": {
+            "accuracy": 0.9809523809523809,
+            "weighted_precision": 0.9809301030353662,
+            "wighted_recall": 0.9809523809523809,
+            "weighted_f1": 0.9809158874817532,
+            "macro_precision": 0.9801169590643275,
+            "macro_recall": 0.9764514714606278,
+            "macro_f1": 0.9782518641259321,
+            "roc_auc": 0.9764514714606279
+        },
+        "confusion_matrix": [
+            [
+                280,
+                3
+            ],
+            [
+                5,
+                132
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "spam_assassin_lemmatized_countvec",
+        "model": "XGBClassifier",
         "metrics": {
             "accuracy": 0.9666666666666667,
             "weighted_precision": 0.9665886939571151,
@@ -1040,87 +825,8 @@
         "epochs": 10
     },
     {
-        "dataset": "spam_assassin_lemmatized_countvec",
-        "model": "Extra Trees Classifier",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9833333333333333,
-            "weighted_precision": 0.9833515986501062,
-            "wighted_recall": 0.9833333333333333,
-            "weighted_f1": 0.9832850191419313,
-            "macro_precision": 0.983796054691577,
-            "macro_recall": 0.9782182559129247,
-            "macro_f1": 0.9809337284936998,
-            "roc_auc": 0.9782182559129247
-        },
-        "confusion_matrix": [
-            [
-                281,
-                2
-            ],
-            [
-                5,
-                132
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_lemmatized_countvec",
-        "model": "Multi-layer Perceptron",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9857142857142858,
-            "weighted_precision": 0.9858085981504284,
-            "wighted_recall": 0.9857142857142858,
-            "weighted_f1": 0.9856585909217489,
-            "macro_precision": 0.9875298001100312,
-            "macro_recall": 0.9799850403652215,
-            "macro_f1": 0.9836257309941521,
-            "roc_auc": 0.9799850403652215
-        },
-        "confusion_matrix": [
-            [
-                282,
-                1
-            ],
-            [
-                5,
-                132
-            ]
-        ],
-        "epochs": 10
-    },
-    {
         "dataset": "spam_assassin_lemmatized_tfidf",
-        "model": "Multinomial Naive Bayes",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9547619047619048,
-            "weighted_precision": 0.9556861585087392,
-            "wighted_recall": 0.9547619047619048,
-            "weighted_f1": 0.9541431397961682,
-            "macro_precision": 0.9608761987794245,
-            "macro_recall": 0.936305486059168,
-            "macro_f1": 0.9471939332578961,
-            "roc_auc": 0.936305486059168
-        },
-        "confusion_matrix": [
-            [
-                280,
-                3
-            ],
-            [
-                16,
-                121
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_lemmatized_tfidf",
-        "model": "Bernoulli Naive Bayes",
-        "type": "normal",
+        "model": "BernoulliNB",
         "metrics": {
             "accuracy": 0.9404761904761905,
             "weighted_precision": 0.9419603174603175,
@@ -1145,112 +851,32 @@
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
-        "model": "Decision Tree",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9452380952380952,
-            "weighted_precision": 0.9453522605465251,
-            "wighted_recall": 0.9452380952380952,
-            "weighted_f1": 0.9452892004750411,
-            "macro_precision": 0.937018193031144,
-            "macro_recall": 0.9386526011709784,
-            "macro_f1": 0.9378278358809332,
-            "roc_auc": 0.9386526011709784
-        },
-        "confusion_matrix": [
-            [
-                271,
-                12
-            ],
-            [
-                11,
-                126
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_lemmatized_tfidf",
-        "model": "Random Forest",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9880952380952381,
-            "weighted_precision": 0.9880853749950684,
-            "wighted_recall": 0.9880952380952381,
-            "weighted_f1": 0.9880839325283769,
-            "macro_precision": 0.9873653686826844,
-            "macro_recall": 0.9855175259859172,
-            "macro_f1": 0.986433319766653,
-            "roc_auc": 0.9855175259859172
-        },
-        "confusion_matrix": [
-            [
-                281,
-                2
-            ],
-            [
-                3,
-                134
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_lemmatized_tfidf",
-        "model": "AdaBoost",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9404761904761905,
-            "weighted_precision": 0.9405991659691938,
-            "wighted_recall": 0.9404761904761905,
-            "weighted_f1": 0.9405317396467839,
-            "macro_precision": 0.9316219549799569,
-            "macro_recall": 0.9332361816821851,
-            "macro_f1": 0.9324215607401448,
-            "roc_auc": 0.9332361816821853
-        },
-        "confusion_matrix": [
-            [
-                270,
-                13
-            ],
-            [
-                12,
-                125
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_lemmatized_tfidf",
-        "model": "Logistic Regression",
-        "type": "normal",
+        "model": "MultinomialNB",
         "metrics": {
             "accuracy": 0.9547619047619048,
-            "weighted_precision": 0.9568531746031746,
+            "weighted_precision": 0.9556861585087392,
             "wighted_recall": 0.9547619047619048,
-            "weighted_f1": 0.9539252637336479,
-            "macro_precision": 0.9658333333333333,
-            "macro_recall": 0.9325397848907688,
-            "macro_f1": 0.946739993726265,
-            "roc_auc": 0.9325397848907688
+            "weighted_f1": 0.9541431397961682,
+            "macro_precision": 0.9608761987794245,
+            "macro_recall": 0.936305486059168,
+            "macro_f1": 0.9471939332578961,
+            "roc_auc": 0.936305486059168
         },
         "confusion_matrix": [
             [
-                282,
-                1
+                279,
+                4
             ],
             [
-                18,
-                119
+                21,
+                116
             ]
         ],
         "epochs": 10
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
-        "model": "Stochastic Gradient Descent",
-        "type": "normal",
+        "model": "LinearSVC",
         "metrics": {
             "accuracy": 0.9714285714285714,
             "weighted_precision": 0.9725907990314769,
@@ -1275,8 +901,57 @@
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
+        "model": "DecisionTreeClassifier",
+        "metrics": {
+            "accuracy": 0.9452380952380952,
+            "weighted_precision": 0.9450297215222587,
+            "wighted_recall": 0.9452380952380952,
+            "weighted_f1": 0.9450793486092027,
+            "macro_precision": 0.9399592944369064,
+            "macro_recall": 0.9348869000025792,
+            "macro_f1": 0.9373536793364419,
+            "roc_auc": 0.9348869000025792
+        },
+        "confusion_matrix": [
+            [
+                273,
+                10
+            ],
+            [
+                13,
+                124
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "spam_assassin_lemmatized_tfidf",
+        "model": "RandomForestClassifier",
+        "metrics": {
+            "accuracy": 0.9833333333333333,
+            "weighted_precision": 0.9833515986501062,
+            "wighted_recall": 0.9833333333333333,
+            "weighted_f1": 0.9832850191419313,
+            "macro_precision": 0.983796054691577,
+            "macro_recall": 0.9782182559129247,
+            "macro_f1": 0.9809337284936998,
+            "roc_auc": 0.9782182559129247
+        },
+        "confusion_matrix": [
+            [
+                281,
+                2
+            ],
+            [
+                5,
+                132
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "spam_assassin_lemmatized_tfidf",
         "model": "Perceptron",
-        "type": "normal",
         "metrics": {
             "accuracy": 0.9880952380952381,
             "weighted_precision": 0.9880853749950684,
@@ -1301,17 +976,16 @@
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
-        "model": "Passive-Aggressive",
-        "type": "normal",
+        "model": "PassiveAggressiveClassifier",
         "metrics": {
-            "accuracy": 0.969047619047619,
-            "weighted_precision": 0.9704070141570141,
-            "wighted_recall": 0.969047619047619,
-            "weighted_f1": 0.9686242535447467,
-            "macro_precision": 0.9780405405405406,
-            "macro_recall": 0.9525547445255474,
-            "macro_f1": 0.9638695332817184,
-            "roc_auc": 0.9525547445255474
+            "accuracy": 0.9714285714285714,
+            "weighted_precision": 0.9725907990314769,
+            "wighted_recall": 0.9714285714285714,
+            "weighted_f1": 0.9710708531279598,
+            "macro_precision": 0.9796610169491525,
+            "macro_recall": 0.9562043795620438,
+            "macro_f1": 0.966718613803851,
+            "roc_auc": 0.9562043795620438
         },
         "confusion_matrix": [
             [
@@ -1319,25 +993,49 @@
                 0
             ],
             [
-                13,
-                124
+                12,
+                125
             ]
         ],
         "epochs": 10
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
-        "model": "SVM",
-        "type": "normal",
+        "model": "AdaBoostClassifier",
         "metrics": {
-            "accuracy": 0.9761904761904762,
-            "weighted_precision": 0.9770030879245897,
-            "wighted_recall": 0.9761904761904762,
-            "weighted_f1": 0.9759462181337183,
-            "macro_precision": 0.9829351535836177,
-            "macro_recall": 0.9635036496350364,
-            "macro_f1": 0.9723800505050506,
-            "roc_auc": 0.9635036496350364
+            "accuracy": 0.9404761904761905,
+            "weighted_precision": 0.9405991659691938,
+            "wighted_recall": 0.9404761904761905,
+            "weighted_f1": 0.9405317396467839,
+            "macro_precision": 0.9316219549799569,
+            "macro_recall": 0.9332361816821851,
+            "macro_f1": 0.9324215607401448,
+            "roc_auc": 0.9332361816821853
+        },
+        "confusion_matrix": [
+            [
+                270,
+                13
+            ],
+            [
+                12,
+                125
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "spam_assassin_lemmatized_tfidf",
+        "model": "ExtraTreesClassifier",
+        "metrics": {
+            "accuracy": 0.9857142857142858,
+            "weighted_precision": 0.9860108749382106,
+            "wighted_recall": 0.9857142857142858,
+            "weighted_f1": 0.9856292960770572,
+            "macro_precision": 0.9896193771626298,
+            "macro_recall": 0.9781021897810219,
+            "macro_f1": 0.9835612149044985,
+            "roc_auc": 0.9781021897810219
         },
         "confusion_matrix": [
             [
@@ -1345,16 +1043,15 @@
                 0
             ],
             [
-                10,
-                127
+                6,
+                131
             ]
         ],
         "epochs": 10
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
-        "model": "K-nearest Neighbors",
-        "type": "normal",
+        "model": "KNeighborsClassifier",
         "metrics": {
             "accuracy": 0.5142857142857142,
             "weighted_precision": 0.8048596564725597,
@@ -1379,34 +1076,7 @@
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
-        "model": "Extra Trees Classifier",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9904761904761905,
-            "weighted_precision": 0.9906089264974282,
-            "wighted_recall": 0.9904761904761905,
-            "weighted_f1": 0.9904390606144992,
-            "macro_precision": 0.9930313588850175,
-            "macro_recall": 0.9854014598540146,
-            "macro_f1": 0.989083820662768,
-            "roc_auc": 0.9854014598540146
-        },
-        "confusion_matrix": [
-            [
-                283,
-                0
-            ],
-            [
-                4,
-                133
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_lemmatized_tfidf",
-        "model": "XGBoost Classifier",
-        "type": "normal",
+        "model": "XGBClassifier",
         "metrics": {
             "accuracy": 0.9666666666666667,
             "weighted_precision": 0.9666072847624289,
@@ -1425,32 +1095,6 @@
             [
                 9,
                 128
-            ]
-        ],
-        "epochs": 10
-    },
-    {
-        "dataset": "spam_assassin_lemmatized_tfidf",
-        "model": "Multi-layer Perceptron",
-        "type": "normal",
-        "metrics": {
-            "accuracy": 0.9880952380952381,
-            "weighted_precision": 0.9881301117425078,
-            "wighted_recall": 0.9880952380952381,
-            "weighted_f1": 0.9881063479293568,
-            "macro_precision": 0.9855843354918286,
-            "macro_recall": 0.9874003765701169,
-            "macro_f1": 0.9864843121480289,
-            "roc_auc": 0.9874003765701168
-        },
-        "confusion_matrix": [
-            [
-                280,
-                3
-            ],
-            [
-                2,
-                135
             ]
         ],
         "epochs": 10

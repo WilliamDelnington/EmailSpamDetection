@@ -1,0 +1,29 @@
+CNN model for phishing urls
+
+Accuracy: 0.9179777880610829
+weighted_precision: 0.918985430789295
+weighted_recall: 0.9179777880610829
+weighted_f1: 0.9157766830207118
+macro_precision: 0.9370730740711171
+macro_recall: 0.845583553591853
+macro_f1: 0.8865120869158044
+
+ANN model for phishing urls
+
+Accuracy: 0.6817655967355181
+weighted_precision: 0.4820780450547928
+weighted_recall: 0.6817655967355181
+weighted_f1: 0.56059568587611
+macro_precision: 0.3520971587577197
+macro_recall: 0.35611506381350644
+macro_f1: 0.3369512787507064
+
+RNN model for phishing urls
+
+Accuracy: 0.7029047999663456
+weighted_precision: 0.6991287562808058
+weighted_recall: 0.7029047999663456
+weighted_f1: 0.6632511240958879
+macro_precision: 0.661409859005027
+macro_recall: 0.5673944435294281
+macro_f1: 0.5504799854655982

@@ -1,0 +1,77 @@
+[
+    {
+        "dataset": "LingSpam",
+        "model": "CNN",
+        "metrics": {
+            "accuracy": 0.9825174825174825,
+            "weighted_precision": 0.9827326468153342,
+            "wighted_recall": 0.9825174825174825,
+            "weighted_f1": 0.982602371659021,
+            "macro_precision": 0.961001052732319,
+            "macro_recall": 0.9700429352068696,
+            "macro_f1": 0.9654547650682449,
+            "roc_auc": 0.9700429352068697
+        },
+        "confusion_matrix": [
+            [
+                241,
+                3
+            ],
+            [
+                2,
+                40
+            ]
+        ],
+        "epochs": 18
+    },
+    {
+        "dataset": "LingSpam",
+        "model": "RNN",
+        "metrics": {
+            "accuracy": 0.986013986013986,
+            "weighted_precision": 0.9864618852222158,
+            "wighted_recall": 0.986013986013986,
+            "weighted_f1": 0.9861478362770353,
+            "macro_precision": 0.9638429752066116,
+            "macro_recall": 0.9819476971116315,
+            "macro_f1": 0.9726289597090632,
+            "roc_auc": 0.9819476971116317
+        },
+        "confusion_matrix": [
+            [
+                241,
+                3
+            ],
+            [
+                1,
+                41
+            ]
+        ],
+        "epochs": 8
+    },
+    {
+        "dataset": "LingSpam",
+        "model": "ANN",
+        "metrics": {
+            "accuracy": 0.9895104895104895,
+            "weighted_precision": 0.9894537518230898,
+            "wighted_recall": 0.9895104895104895,
+            "weighted_f1": 0.9894580251591117,
+            "macro_precision": 0.9837232453957192,
+            "macro_recall": 0.9741412958626073,
+            "macro_f1": 0.9788602261807968,
+            "roc_auc": 0.9741412958626073
+        },
+        "confusion_matrix": [
+            [
+                243,
+                1
+            ],
+            [
+                2,
+                40
+            ]
+        ],
+        "epochs": 20
+    }
+]

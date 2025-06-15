@@ -1,0 +1,77 @@
+[
+    {
+        "dataset": "SpamAssassin",
+        "model": "CNN",
+        "metrics": {
+            "accuracy": 0.9714285714285714,
+            "weighted_precision": 0.9714076131094287,
+            "wighted_recall": 0.9714285714285714,
+            "weighted_f1": 0.9713171818434975,
+            "macro_precision": 0.9710251237850724,
+            "macro_recall": 0.9637357818988419,
+            "macro_f1": 0.967251461988304,
+            "roc_auc": 0.9637357818988419
+        },
+        "confusion_matrix": [
+            [
+                279,
+                4
+            ],
+            [
+                8,
+                129
+            ]
+        ],
+        "epochs": 16
+    },
+    {
+        "dataset": "SpamAssassin",
+        "model": "RNN",
+        "metrics": {
+            "accuracy": 0.9714285714285714,
+            "weighted_precision": 0.9721729534003901,
+            "wighted_recall": 0.9714285714285714,
+            "weighted_f1": 0.9715816326530612,
+            "macro_precision": 0.9631163060765948,
+            "macro_recall": 0.9731500348198396,
+            "macro_f1": 0.967857142857143,
+            "roc_auc": 0.9731500348198395
+        },
+        "confusion_matrix": [
+            [
+                274,
+                9
+            ],
+            [
+                3,
+                134
+            ]
+        ],
+        "epochs": 9
+    },
+    {
+        "dataset": "SpamAssassin",
+        "model": "ANN",
+        "metrics": {
+            "accuracy": 0.9714285714285714,
+            "weighted_precision": 0.9714076131094287,
+            "wighted_recall": 0.9714285714285714,
+            "weighted_f1": 0.9713171818434975,
+            "macro_precision": 0.9710251237850724,
+            "macro_recall": 0.9637357818988419,
+            "macro_f1": 0.967251461988304,
+            "roc_auc": 0.9637357818988419
+        },
+        "confusion_matrix": [
+            [
+                279,
+                4
+            ],
+            [
+                8,
+                129
+            ]
+        ],
+        "epochs": 18
+    }
+]

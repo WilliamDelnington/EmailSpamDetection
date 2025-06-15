@@ -1,0 +1,32 @@
+ResNet
+{'accuracy': 0.9942528735632183,
+ 'weighted_precision': 0.994322960470984,
+ 'weighted_recall': 0.9942528735632183,
+ 'weighted_f1': 0.9942549700112637,
+ 'macro_precision': 0.9939024390243902,
+ 'macro_recall': 0.9946236559139785,
+ 'macro_f1': 0.9942298126347207,
+ 'confusion_matrix': array([[81,  0],
+        [ 1, 92]])}
+
+MobileNet
+{'accuracy': 0.9885057471264368,
+ 'weighted_precision': 0.9887477313974592,
+ 'weighted_recall': 0.9885057471264368,
+ 'weighted_f1': 0.9884950476889215,
+ 'macro_precision': 0.9894736842105263,
+ 'macro_recall': 0.9876543209876543,
+ 'macro_f1': 0.9884308510638298,
+ 'confusion_matrix': array([[79,  2],
+        [ 0, 93]])}
+
+VGG16
+{'accuracy': 0.9942528735632183,
+ 'weighted_precision': 0.9943140132061629,
+ 'weighted_recall': 0.9942528735632183,
+ 'weighted_f1': 0.9942503919926973,
+ 'macro_precision': 0.9946808510638299,
+ 'macro_recall': 0.9938271604938271,
+ 'macro_f1': 0.9942206131464444,
+ 'confusion_matrix': array([[80,  1],
+        [ 0, 93]])}
