@@ -14,6 +14,7 @@ from keras.src.utils.image_dataset_utils import image_dataset_from_directory
 from keras.src.applications.resnet import ResNet50
 from keras.src.applications.mobilenet_v3 import MobileNetV3Small
 from keras.src.applications.vgg16 import VGG16
+from keras.src.applications.inception_v3 import InceptionV3
 from keras.src.optimizers import Adam
 from keras.src.callbacks import EarlyStopping
 from tqdm import tqdm
@@ -105,15 +106,21 @@ class ImageClassificationPipeline:
         
         return self.X_train, self.X_test, self.y_train, self.y_test
     
-    def visualize_data_distribution(self):
+    def visualize_data_distribution(self, y):
         """Visualize data distribution and sample images"""
+        labels_count = pd.Series(y).value_counts()
+        print(labels_count)
+        plt.figure(figsize=(10, 6))
+        plt.pie(labels_count.values, labels=["Spam", "Natural"], autopct='%1.1f%%')
+        plt.title("Class Distribution")
+        plt.show()
+
         fig, axes = plt.subplots(2, 2, figsize=(15, 12))
         
         # Class distribution
-        labels_count = pd.Series(self.y_train).value_counts()
         axes[0, 0].bar(['Natural (0)', 'Spam (1)'], [labels_count[0], labels_count[1]], 
                       color=['skyblue', 'salmon'])
-        axes[0, 0].set_title('Training Set Class Distribution')
+        axes[0, 0].set_title('Class Distribution')
         axes[0, 0].set_ylabel('Number of Images')
         
         # Sample images from each class
@@ -275,7 +282,7 @@ class ImageClassificationPipeline:
             monitor='val_loss',
             patience=epoch_limitation,
             restore_best_weights=True,
-            min_delta=1e-04
+            min_delta=1e-03
         )
         
         # Create data generators
@@ -303,7 +310,7 @@ class ImageClassificationPipeline:
         
         # Predictions
         y_pred_proba = model.predict(self.X_test)
-        y_pred = np.argmax(y_pred_proba, axis=1)
+        y_pred = (y_pred_proba > 0.5).astype(int).flatten()
         
         # Classification report
         print("\nClassification Report:")
@@ -321,6 +328,7 @@ class ImageClassificationPipeline:
         plt.show()
         
         return {
+            'model_name': model_name,
             'accuracy': accuracy_score(self.y_test, y_pred),
             'weighted_precision': precision_score(self.y_test, y_pred, average="weighted"),
             'weighted_recall': recall_score(self.y_test, y_pred, average="weighted"),

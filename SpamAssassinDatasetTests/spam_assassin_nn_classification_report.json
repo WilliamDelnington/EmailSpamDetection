@@ -1,77 +1,77 @@
 [
     {
-        "dataset": "SpamAssassin",
+        "dataset": "spam_assassin",
         "model": "CNN",
         "metrics": {
-            "accuracy": 0.9714285714285714,
-            "weighted_precision": 0.9714076131094287,
-            "wighted_recall": 0.9714285714285714,
-            "weighted_f1": 0.9713171818434975,
-            "macro_precision": 0.9710251237850724,
-            "macro_recall": 0.9637357818988419,
-            "macro_f1": 0.967251461988304,
-            "roc_auc": 0.9637357818988419
+            "accuracy": 0.9885245901639345,
+            "weighted_precision": 0.9885117559595349,
+            "wighted_recall": 0.9885245901639345,
+            "weighted_f1": 0.9885149539257653,
+            "macro_precision": 0.9868689777963972,
+            "macro_recall": 0.985236361738495,
+            "macro_f1": 0.9860480769544945,
+            "roc_auc": 0.985236361738495
         },
         "confusion_matrix": [
             [
-                279,
-                4
+                430,
+                3
             ],
             [
-                8,
-                129
+                4,
+                173
             ]
         ],
-        "epochs": 16
+        "epochs": 10
     },
     {
-        "dataset": "SpamAssassin",
+        "dataset": "spam_assassin",
         "model": "RNN",
         "metrics": {
-            "accuracy": 0.9714285714285714,
-            "weighted_precision": 0.9721729534003901,
-            "wighted_recall": 0.9714285714285714,
-            "weighted_f1": 0.9715816326530612,
-            "macro_precision": 0.9631163060765948,
-            "macro_recall": 0.9731500348198396,
-            "macro_f1": 0.967857142857143,
-            "roc_auc": 0.9731500348198395
+            "accuracy": 0.9819672131147541,
+            "weighted_precision": 0.9821127208031515,
+            "wighted_recall": 0.9819672131147541,
+            "weighted_f1": 0.9820116379283513,
+            "macro_precision": 0.9759043927648579,
+            "macro_recall": 0.9806174240941532,
+            "macro_f1": 0.9782207205014104,
+            "roc_auc": 0.9806174240941533
         },
         "confusion_matrix": [
             [
-                274,
-                9
+                426,
+                7
             ],
             [
-                3,
-                134
+                4,
+                173
             ]
         ],
-        "epochs": 9
+        "epochs": 7
     },
     {
-        "dataset": "SpamAssassin",
+        "dataset": "spam_assassin",
         "model": "ANN",
         "metrics": {
-            "accuracy": 0.9714285714285714,
-            "weighted_precision": 0.9714076131094287,
-            "wighted_recall": 0.9714285714285714,
-            "weighted_f1": 0.9713171818434975,
-            "macro_precision": 0.9710251237850724,
-            "macro_recall": 0.9637357818988419,
-            "macro_f1": 0.967251461988304,
-            "roc_auc": 0.9637357818988419
+            "accuracy": 0.9868852459016394,
+            "weighted_precision": 0.9868994707113121,
+            "wighted_recall": 0.9868852459016394,
+            "weighted_f1": 0.986840453309645,
+            "macro_precision": 0.9873546646208384,
+            "macro_recall": 0.9807413786354562,
+            "macro_f1": 0.9839737274220033,
+            "roc_auc": 0.9807413786354563
         },
         "confusion_matrix": [
             [
-                279,
-                4
+                431,
+                2
             ],
             [
-                8,
-                129
+                6,
+                171
             ]
         ],
-        "epochs": 18
+        "epochs": 15
     }
 ]

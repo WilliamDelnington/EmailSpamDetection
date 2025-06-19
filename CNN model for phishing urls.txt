@@ -1,22 +1,22 @@
 CNN model for phishing urls
 
-Accuracy: 0.9179777880610829
-weighted_precision: 0.918985430789295
-weighted_recall: 0.9179777880610829
-weighted_f1: 0.9157766830207118
-macro_precision: 0.9370730740711171
-macro_recall: 0.845583553591853
-macro_f1: 0.8865120869158044
+Accuracy: 0.9197
+weighted_precision: 0.9204
+weighted_recall: 0.9197
+weighted_f1: 0.9177
+macro_precision: 0.9348
+macro_recall: 0.8492
+macro_f1: 0.8878
 
 ANN model for phishing urls
 
-Accuracy: 0.6817655967355181
-weighted_precision: 0.4820780450547928
-weighted_recall: 0.6817655967355181
-weighted_f1: 0.56059568587611
-macro_precision: 0.3520971587577197
-macro_recall: 0.35611506381350644
-macro_f1: 0.3369512787507064
+Accuracy: 0.6811
+weighted_precision: 0.4820
+weighted_recall: 0.6811
+weighted_f1: 0.5596
+macro_precision: 0.3529
+macro_recall: 0.3471
+macro_f1: 0.3297
 
 RNN model for phishing urls
 

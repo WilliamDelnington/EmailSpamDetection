@@ -14,7 +14,9 @@ EnronDatasetTests/models
 EnronDatasetTests/preprocess
 EnronDatasetTests/figs
 SpamAssassinDatasetTests/easy_ham
+SpamAssassinDatasetTests/easy_ham_2
 SpamAssassinDatasetTests/hard_ham
+SpamAssassinDatasetTests/spam
 SpamAssassinDatasetTests/spam_2
 SpamAssassinDatasetTests/models
 SpamAssassinDatasetTests/figs

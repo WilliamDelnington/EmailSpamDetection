@@ -7,7 +7,9 @@ from sklearn.metrics import (
     accuracy_score, 
     precision_score, 
     recall_score, 
-    f1_score
+    f1_score,
+    roc_auc_score,
+    roc_curve
 )
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import ConfusionMatrixDisplay
@@ -15,7 +17,8 @@ from sklearn.ensemble import (
     RandomForestClassifier, 
     AdaBoostClassifier, 
     HistGradientBoostingClassifier,
-    ExtraTreesClassifier
+    ExtraTreesClassifier,
+    BaggingClassifier
 )
 from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
 from sklearn.neighbors import KNeighborsClassifier
@@ -45,6 +48,7 @@ from scipy.spatial import distance
 import joblib
 import json
 import math
+import os
 
 model_parameters = {
     "SVM": {
@@ -170,7 +174,6 @@ def get_classification_models(nomlp = True):
         ]
     else:
         return [
-            KNeighborsClassifier(n_jobs=5),
             LinearSVC(),
             MultinomialNB(),
             BernoulliNB(),
@@ -183,6 +186,8 @@ def get_classification_models(nomlp = True):
             PassiveAggressiveClassifier(n_jobs=4),
             ExtraTreesClassifier(n_jobs=4),
             XGBClassifier(),
+            KNeighborsClassifier(n_jobs=5),
+            BaggingClassifier(n_jobs=4, random_state=42)
         ]
 
 class EvaluateError(Exception):
@@ -698,7 +703,7 @@ class ClassificationModel2:
             print("Val size: ", self.X_test.shape)
         
 
-    def train_with_epochs(self, model:BaseEstimator, epochs, valid_size=0, save_model=False, reduce_dim=False):
+    def train_with_epochs(self, model:BaseEstimator, epochs, valid_size=0, save_model=False, save_folder="./models/normal", reduce_dim=False, skip_training_val_accuracy=True):
         if reduce_dim:
             self.__reduce_dim(100)
 
@@ -706,48 +711,32 @@ class ClassificationModel2:
         validation_accuracies = []
         self.epochs = range(1, epochs + 1)
 
-        if isinstance(model, (
-            KNeighborsClassifier,
-            AdaBoostClassifier,
-            XGBClassifier,
-            Perceptron,
-            PassiveAggressiveClassifier,
-            MultinomialNB,
-            BernoulliNB,
-            LinearSVC,
-        )):
-            print("Skipping epochs training due to longevity.")
-            model.fit(self.X_train, self.y_train)
-
-            y_pred_train = model.predict(self.X_train)
-            train_accuracy = accuracy_score(self.y_train, y_pred_train)
-            training_accuracies = [train_accuracy] * len(self.epochs)
-            if valid_size != 0:
-                y_pred_val = model.predict(self.X_val)
-                val_accuracy = accuracy_score(self.y_val, y_pred_val)
-                validation_accuracies = [val_accuracy] * len(self.epochs)
-        elif isinstance(model, (
-                DecisionTreeClassifier,
-                RandomForestClassifier,
-                ExtraTreesClassifier
+        if not skip_training_val_accuracy:
+            if isinstance(model, (
+                KNeighborsClassifier,
+                AdaBoostClassifier,
+                XGBClassifier,
+                Perceptron,
+                PassiveAggressiveClassifier,
+                MultinomialNB,
+                BernoulliNB,
+                LinearSVC,
             )):
-            try:
+                print("Skipping epochs training due to longevity.")
                 model.fit(self.X_train, self.y_train)
-            except TypeError:
-                self.X_train = self.X_train.toarray()
-                model.fit(self.X_train, self.y_train)
-            y_pred_train = model.predict(self.X_train)
-            train_accuracy = accuracy_score(self.y_train, y_pred_train)
-            training_accuracies = [train_accuracy] * len(self.epochs)
-            if valid_size != 0:
-                for epoch in self.epochs:
+
+                y_pred_train = model.predict(self.X_train)
+                train_accuracy = accuracy_score(self.y_train, y_pred_train)
+                training_accuracies = [train_accuracy] * len(self.epochs)
+                if valid_size != 0:
                     y_pred_val = model.predict(self.X_val)
                     val_accuracy = accuracy_score(self.y_val, y_pred_val)
-                    validation_accuracies.append(val_accuracy)
-        else:
-            for epoch in self.epochs:
-                if epoch % 5 == 0:
-                    print(f"{self.model_name} begins epoch {epoch}")
+                    validation_accuracies = [val_accuracy] * len(self.epochs)
+            elif isinstance(model, (
+                    DecisionTreeClassifier,
+                    RandomForestClassifier,
+                    ExtraTreesClassifier
+                )):
                 try:
                     model.fit(self.X_train, self.y_train)
                 except TypeError:
@@ -755,17 +744,37 @@ class ClassificationModel2:
                     model.fit(self.X_train, self.y_train)
                 y_pred_train = model.predict(self.X_train)
                 train_accuracy = accuracy_score(self.y_train, y_pred_train)
-                training_accuracies.append(train_accuracy)
+                training_accuracies = [train_accuracy] * len(self.epochs)
                 if valid_size != 0:
-                    y_pred_val = model.predict(self.X_val)
-                    val_accuracy = accuracy_score(self.y_val, y_pred_val)
-                    validation_accuracies.append(val_accuracy)
+                    for epoch in self.epochs:
+                        y_pred_val = model.predict(self.X_val)
+                        val_accuracy = accuracy_score(self.y_val, y_pred_val)
+                        validation_accuracies.append(val_accuracy)
+            else:
+                for epoch in self.epochs:
+                    if epoch % 5 == 0:
+                        print(f"{self.model_name} begins epoch {epoch}")
+                    try:
+                        model.fit(self.X_train, self.y_train)
+                    except TypeError:
+                        self.X_train = self.X_train.toarray()
+                        model.fit(self.X_train, self.y_train)
+                    y_pred_train = model.predict(self.X_train)
+                    train_accuracy = accuracy_score(self.y_train, y_pred_train)
+                    training_accuracies.append(train_accuracy)
+                    if valid_size != 0:
+                        y_pred_val = model.predict(self.X_val)
+                        val_accuracy = accuracy_score(self.y_val, y_pred_val)
+                        validation_accuracies.append(val_accuracy)
+        else:
+            print("Skipping training and validation accuracy calculation.")
+            model.fit(self.X_train, self.y_train)
 
         model_name = model.__class__.__name__
 
         if save_model:
             try:
-                self.__save_model(model, f"./models/normal/{model_name}_{self.dataset_name}_normal.joblib")
+                self.__save_model(model, os.path.join(save_folder, f"{model_name}_{self.dataset_name}_normal.joblib"))
             except Exception as e:
                 print(f"Error saving model: {e}")
                 trb.print_exc()
@@ -773,6 +782,7 @@ class ClassificationModel2:
         return training_accuracies, validation_accuracies
 
     def train_and_evaluate_models(self,
+        plotting=False,
         epochs=10,
         valid_size=0.15,
         save_plot:bool=False,
@@ -782,20 +792,29 @@ class ClassificationModel2:
         max_workers=3,
         nomlp=False,
         reduce_dim=False,
+        skipping_train_val_accuracy=True
     ):
         metric_results = []
 
         def __t_and_e(model):
             print(f"Begin {model.__class__.__name__}")
-            training_accuracies, validation_accuracies = self.train_with_epochs(model, epochs, valid_size=valid_size, reduce_dim=reduce_dim)
-            print(f"{model.__class__.__name__} classification report")
-            self.plot_train_val_accuracy_after_epochs(
+            training_accuracies, validation_accuracies = self.train_with_epochs(
                 model, 
-                training_accuracies,
-                validation_accuracies,
-                xlabel=plot_xlabel, 
-                ylabel=plot_ylabel, 
-                save_plot=save_plot)
+                epochs, 
+                valid_size=valid_size, 
+                reduce_dim=reduce_dim, 
+                skip_training_val_accuracy=skipping_train_val_accuracy
+            )
+            print(f"{model.__class__.__name__} classification report")
+            if plotting:
+                self.plot_train_val_accuracy_after_epochs(
+                    model, 
+                    training_accuracies,
+                    validation_accuracies,
+                    xlabel=plot_xlabel, 
+                    ylabel=plot_ylabel, 
+                    save_plot=save_plot)
+            self.evaluate_and_plot_proba(model)
             metrics = self.evaluate(model, detailed=True)
             del model
             metric_results.append(metrics)
@@ -820,7 +839,8 @@ class ClassificationModel2:
             validation_accuracies:list,
             xlabel="X Label", 
             ylabel="Y Label", 
-            save_plot=False):        
+            save_plot=False,
+            save_folder="./figs/"):        
         print(self.epochs)
         print(len(training_accuracies))
         print(len(validation_accuracies))
@@ -848,7 +868,7 @@ class ClassificationModel2:
         plt.ylabel(ylabel)
         plt.grid(True, alpha=0.3)
         if save_plot:
-            plt.savefig(f"./figs/normal/{model_name}_{self.dataset_name}_normal.jpg")
+            plt.savefig(os.path.join(save_folder, f"{model_name}_{self.dataset_name}_normal.jpg"))
         plt.show()
 
     def evaluate(self, model:BaseEstimator, detailed=False):
@@ -883,6 +903,40 @@ class ClassificationModel2:
 
             return detailed_metrics
         return classification_report(self.y_test, y_pred)
+
+    def evaluate_and_plot_proba(self, model:BaseEstimator, save_plot=True, save_folder="./figs/"):
+        if isinstance(model, (
+            KNeighborsClassifier, 
+            AdaBoostClassifier, 
+            XGBClassifier,
+            LogisticRegression,
+            BernoulliNB,
+            DecisionTreeClassifier,
+            RandomForestClassifier,
+            ExtraTreesClassifier,
+            MultinomialNB,
+            BernoulliNB,
+            BaggingClassifier
+            )):
+
+            y_proba = model.predict_proba(self.X_test)[:, 1]
+
+            fpr, tpr, thresholds = roc_curve(self.y_test, y_proba)
+
+            plt.figure(figsize=(10, 6))
+            plt.plot(fpr, tpr, color='blue', label=f'ROC curve for {model.__class__.__name__}')
+            plt.plot([0, 1], [0, 1], color='red', linestyle='--')  # Diagonal line
+            plt.title(f'ROC Curve for {model.__class__.__name__}')
+            plt.xlabel('False Positive Rate')
+            plt.ylabel('True Positive Rate')
+            if save_plot:
+                plt.savefig(os.path.join(save_folder, f"{model.__class__.__name__}_roc_curve.jpg"))
+            plt.legend()
+            plt.grid(True)
+            plt.show()
+
+        else:
+            print("Model does not support probability prediction. Skipping ROC curve plotting.")
 
 def add_to_json_array(filename, new_object, array_key=None, mode="overwrite"):
     if mode != "overwrite":

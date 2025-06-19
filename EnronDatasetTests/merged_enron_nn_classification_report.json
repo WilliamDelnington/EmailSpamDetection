@@ -1,75 +1,75 @@
 [
     {
-        "dataset": "merged_enron",
+        "dataset": "enron",
         "model": "CNN",
         "metrics": {
-            "accuracy": 0.986061684460261,
-            "weighted_precision": 0.9860627531263619,
-            "wighted_recall": 0.986061684460261,
-            "weighted_f1": 0.9860614379683282,
-            "macro_precision": 0.9860741522314403,
-            "macro_recall": 0.9860397695360174,
-            "macro_f1": 0.9860561794737677,
-            "roc_auc": 0.9860397695360174
+            "accuracy": 0.9902135231316725,
+            "weighted_precision": 0.9902212062416978,
+            "wighted_recall": 0.9902135231316725,
+            "weighted_f1": 0.9902130951745927,
+            "macro_precision": 0.9902563290303846,
+            "macro_recall": 0.9901705816357987,
+            "macro_f1": 0.9902091824241468,
+            "roc_auc": 0.9901705816357989
         },
         "confusion_matrix": [
             [
-                1629,
-                25
+                1634,
+                20
             ],
             [
-                22,
-                1696
+                13,
+                1705
             ]
         ],
-        "epochs": 8
+        "epochs": 15
     },
     {
-        "dataset": "merged_enron",
+        "dataset": "enron",
         "model": "RNN",
         "metrics": {
-            "accuracy": 0.9872479240806643,
-            "weighted_precision": 0.9872670980050194,
-            "wighted_recall": 0.9872479240806643,
-            "weighted_f1": 0.9872469983714052,
-            "macro_precision": 0.9873228766940527,
-            "macro_recall": 0.9871813911454645,
-            "macro_f1": 0.9872416124266252,
-            "roc_auc": 0.9871813911454645
+            "accuracy": 0.9896204033214709,
+            "weighted_precision": 0.9896399722766686,
+            "wighted_recall": 0.9896204033214709,
+            "weighted_f1": 0.9896196498371903,
+            "macro_precision": 0.9896969001463347,
+            "macro_recall": 0.9895547253421697,
+            "macro_f1": 0.9896152659286483,
+            "roc_auc": 0.9895547253421698
         },
         "confusion_matrix": [
             [
-                1627,
-                27
+                1631,
+                23
             ],
             [
-                16,
-                1702
+                12,
+                1706
             ]
         ],
-        "epochs": 20
+        "epochs": 10
     },
     {
-        "dataset": "SpamAssassin",
+        "dataset": "enron",
         "model": "ANN",
         "metrics": {
-            "accuracy": 0.9937722419928826,
-            "weighted_precision": 0.9937762359943364,
-            "wighted_recall": 0.9937722419928826,
-            "weighted_f1": 0.9937720529511983,
-            "macro_precision": 0.993801797603641,
-            "macro_recall": 0.993741844303083,
-            "macro_f1": 0.9937696332176422,
-            "roc_auc": 0.993741844303083
+            "accuracy": 0.9887307236061684,
+            "weighted_precision": 0.9887316653524297,
+            "wighted_recall": 0.9887307236061684,
+            "weighted_f1": 0.9887308465450991,
+            "macro_precision": 0.9887165974122496,
+            "macro_recall": 0.9887379239378766,
+            "macro_f1": 0.9887269124993181,
+            "roc_auc": 0.9887379239378766
         },
         "confusion_matrix": [
             [
-                1641,
-                13
+                1636,
+                18
             ],
             [
-                8,
-                1710
+                20,
+                1698
             ]
         ],
         "epochs": 11
