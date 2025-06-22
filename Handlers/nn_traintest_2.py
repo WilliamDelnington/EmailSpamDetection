@@ -74,6 +74,20 @@ class NeuralNetworkClassifier:
         if reshaping:
             if isinstance(self.X, (pd.DataFrame, pd.Series)):
                 self.X = self.X.to_numpy(dtype=np.float32).reshape((self.X.shape[0], self.X.shape[1], 1))
+
+    def __scaling(self, X):
+        """
+        Scale the input features using StandardScaler.
+        Parameters:
+        - X: The input samples and features to be scaled.
+        """
+        if isinstance(X, (pd.DataFrame, pd.Series)):
+            X = X.to_numpy(dtype=np.float32)
+        
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+        
+        return X_scaled
                 
 
     def split(self, test_size=0.1, valid_size=0.1, random_state=42):
@@ -109,7 +123,75 @@ class NeuralNetworkClassifier:
 
         self.vectorizer.adapt(self.X_train)
 
-    def build_CNN(self, embed_and_vectorize=True):
+    def build_simple_CNN(self, embed_and_vectorize=True):
+        model = Sequential()
+        if embed_and_vectorize:
+            model.add(self.vectorizer)
+            model.add(
+                Embedding(
+                    input_dim=self.max_features, 
+                    output_dim=128, input_length=self.input_length))
+        model.add(Conv1D(64, kernel_size=3, activation='relu'))
+        model.add(MaxPooling1D(pool_size=2))
+        model.add(Dropout(0.3))
+        model.add(Dense(128, activation='relu'))
+        model.add(Dropout(0.3))
+        model.add(Dense(64, activation='relu'))
+        model.add(Dropout(0.3))
+        model.add(Dense(1, activation='sigmoid') if self.multi_class == "binary" else Dense(self.num_classes, activation="softmax"))
+
+        model.compile(
+            loss='binary_crossentropy' if self.multi_class=="binary" else "sparse_categorical_crossentropy",
+            optimizer='adam',
+            metrics=[
+                'accuracy', 
+                # 'precision', 
+                # 'recall'
+            ]
+        )
+
+        model.summary()
+
+        return model
+
+    def buiid_one_layer_CNN(self, embed_and_vectorize=True):
+        model = Sequential()
+        if embed_and_vectorize:
+            model.add(self.vectorizer)
+            model.add(
+                Embedding(
+                    input_dim=self.max_features, 
+                    output_dim=128, input_length=self.input_length))
+        model.add(Conv1D(128, kernel_size=3, activation='relu'))
+        model.add(BatchNormalization())
+        model.add(Conv1D(128, kernel_size=3, activation='relu'))
+        model.add(MaxPooling1D(pool_size=2))
+        model.add(Dropout(0.3))
+
+        model.add(Dense(128, activation='relu'))
+        model.add(Dropout(0.3))
+        model.add(Dense(64, activation='relu'))
+        model.add(Dropout(0.3))
+        if self.multi_class == "binary":
+            model.add(Dense(1, activation='sigmoid'))
+        else:
+            model.add(Dense(self.num_classes, activation="softmax"))
+
+        model.compile(
+            loss='binary_crossentropy' if self.multi_class=="binary" else "sparse_categorical_crossentropy",
+            optimizer='adam',
+            metrics=[
+                'accuracy', 
+                # 'precision', 
+                # 'recall'
+            ]
+        )
+
+        model.summary()
+
+        return model
+
+    def build_two_layer_CNN(self, embed_and_vectorize=True):
         model = Sequential()
         if embed_and_vectorize:
             model.add(self.vectorizer)
@@ -133,9 +215,9 @@ class NeuralNetworkClassifier:
         model.add(GlobalMaxPooling1D())
 
         model.add(Dense(128, activation='relu'))
-        model.add(Dropout(0.5))
+        model.add(Dropout(0.3))
         model.add(Dense(64, activation='relu'))
-        model.add(Dropout(0.4))
+        model.add(Dropout(0.3))
         if self.multi_class == "binary":
             model.add(Dense(1, activation='sigmoid'))
         else:
@@ -155,7 +237,45 @@ class NeuralNetworkClassifier:
 
         return model
     
-    def build_RNN(self, embed_and_vectorize=True, bidirectional=False):
+    def build_one_RNN(self, embed_and_vectorize=True, bidirectional=False):
+        model = Sequential()
+        if embed_and_vectorize:
+            model.add(self.vectorizer)
+            model.add(
+                Embedding(
+                    input_dim=self.max_features, 
+                    output_dim=128, input_length=self.input_length))
+        if bidirectional:
+            model.add(Bidirectional(GRU(128)))
+            model.add(Dropout(0.3))
+        else:
+            model.add(GRU(128))
+            model.add(Dropout(0.3))
+
+        model.add(Dense(128, activation='relu'))
+        model.add(Dropout(0.3))
+        model.add(Dense(64, activation='relu'))
+        model.add(Dropout(0.3))
+        if self.multi_class == "binary":
+            model.add(Dense(1, activation='sigmoid'))
+        else:
+            model.add(Dense(self.num_classes, activation="softmax"))
+
+        model.compile(
+            loss='binary_crossentropy' if self.multi_class=="binary" else "sparse_categorical_crossentropy",
+            optimizer='adam',
+            metrics=[
+                'accuracy', 
+                # 'precision', 
+                # 'recall'
+            ]
+        )
+
+        model.summary()
+
+        return model
+    
+    def build_two_RNN(self, embed_and_vectorize=True, bidirectional=False):
         model = Sequential()
         if embed_and_vectorize:
             model.add(self.vectorizer)
@@ -175,8 +295,9 @@ class NeuralNetworkClassifier:
             model.add(Dropout(0.3))
 
         model.add(Dense(128, activation='relu'))
-        model.add(Dropout(0.4))
+        model.add(Dropout(0.3))
         model.add(Dense(64, activation='relu'))
+        model.add(Dropout(0.3))
         if self.multi_class == "binary":
             model.add(Dense(1, activation='sigmoid'))
         else:
@@ -196,7 +317,7 @@ class NeuralNetworkClassifier:
 
         return model
 
-    def build_CNN_LSTM(self, embed_and_vectorize=True, bidirectional=False):
+    def build_CNN_GRU(self, embed_and_vectorize=True, bidirectional=False):
         model = Sequential()
         if embed_and_vectorize:
             model.add(self.vectorizer)
@@ -211,14 +332,14 @@ class NeuralNetworkClassifier:
         model.add(Dropout(0.3))
 
         if bidirectional:
-            model.add(Bidirectional(LSTM(64, return_sequences=True)))
+            model.add(Bidirectional(GRU(64, return_sequences=True)))
             model.add(Dropout(0.3))
-            model.add(Bidirectional(LSTM(32)))
+            model.add(Bidirectional(GRU(32)))
             model.add(Dropout(0.3))
         else:
-            model.add(LSTM(64, return_sequences=True))
+            model.add(GRU(64, return_sequences=True))
             model.add(Dropout(0.3))
-            model.add(LSTM(32))
+            model.add(GRU(32))
             model.add(Dropout(0.3))
 
         model.add(Dense(128, activation='relu'))

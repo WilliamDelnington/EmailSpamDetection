@@ -18,7 +18,8 @@ from sklearn.ensemble import (
     AdaBoostClassifier, 
     HistGradientBoostingClassifier,
     ExtraTreesClassifier,
-    BaggingClassifier
+    BaggingClassifier,
+    VotingClassifier
 )
 from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
 from sklearn.neighbors import KNeighborsClassifier
@@ -187,7 +188,21 @@ def get_classification_models(nomlp = True):
             ExtraTreesClassifier(n_jobs=4),
             XGBClassifier(),
             KNeighborsClassifier(n_jobs=5),
-            BaggingClassifier(n_jobs=4, random_state=42)
+            BaggingClassifier(n_jobs=4, random_state=42),
+            VotingClassifier([
+                ("LinearSVC", LinearSVC()),
+                ("MultinomialNB", MultinomialNB()),
+                ("BernoulliNB", BernoulliNB()),
+                ("RandomForest", RandomForestClassifier(n_jobs=4)),
+                ("DecisionTree", DecisionTreeClassifier()),
+                ("AdaBoost", AdaBoostClassifier()),
+                ("LogisticRegression", LogisticRegression(n_jobs=4)),
+                ("SGDClassifier", SGDClassifier()),
+                ("Perceptron", Perceptron()),
+                ("PassiveAggressive", PassiveAggressiveClassifier(n_jobs=4)),
+                ("ExtraTrees", ExtraTreesClassifier(n_jobs=4)),
+                ("XGBClassifier", XGBClassifier())
+            ], n_jobs=4)
         ]
 
 class EvaluateError(Exception):
@@ -721,6 +736,7 @@ class ClassificationModel2:
                 MultinomialNB,
                 BernoulliNB,
                 LinearSVC,
+                VotingClassifier
             )):
                 print("Skipping epochs training due to longevity.")
                 model.fit(self.X_train, self.y_train)

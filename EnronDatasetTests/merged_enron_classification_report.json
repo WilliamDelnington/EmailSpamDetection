@@ -3,23 +3,23 @@
         "dataset": "enron_lemmatized_tfidf",
         "model": "LinearSVC",
         "metrics": {
-            "accuracy": 0.9881376037959668,
-            "weighted_precision": 0.9882334167109232,
-            "wighted_recall": 0.9881376037959668,
-            "weighted_f1": 0.9881353989051331,
-            "macro_precision": 0.9883611672641981,
-            "macro_recall": 0.9879981925497576,
-            "macro_f1": 0.9881295191962431,
-            "roc_auc": 0.9879981925497576
+            "accuracy": 0.9899154678926294,
+            "weighted_precision": 0.9899685402368268,
+            "wighted_recall": 0.9899154678926294,
+            "weighted_f1": 0.9899137494614516,
+            "macro_precision": 0.9901004839814287,
+            "macro_recall": 0.9897665305455532,
+            "macro_f1": 0.9899052050397623,
+            "roc_auc": 0.9897665305455532
         },
         "confusion_matrix": [
             [
-                1622,
-                32
+                3230,
+                52
             ],
             [
-                8,
-                1710
+                16,
+                3445
             ]
         ],
         "epochs": 10
@@ -28,23 +28,23 @@
         "dataset": "enron_lemmatized_tfidf",
         "model": "MultinomialNB",
         "metrics": {
-            "accuracy": 0.9884341637010676,
-            "weighted_precision": 0.9884816483485525,
-            "wighted_recall": 0.9884341637010676,
-            "weighted_f1": 0.9884327622223062,
-            "macro_precision": 0.988571031214406,
-            "macro_recall": 0.9883342741271381,
-            "macro_f1": 0.9884274860669688,
-            "roc_auc": 0.988334274127138
+            "accuracy": 0.9876909387512977,
+            "weighted_precision": 0.9876991462884057,
+            "wighted_recall": 0.9876909387512977,
+            "weighted_f1": 0.9876901503066002,
+            "macro_precision": 0.9877481179264838,
+            "macro_recall": 0.9876231644294102,
+            "macro_f1": 0.9876807415332103,
+            "roc_auc": 0.9876231644294102
         },
         "confusion_matrix": [
             [
-                1626,
-                28
+                3233,
+                49
             ],
             [
-                11,
-                1707
+                34,
+                3427
             ]
         ],
         "epochs": 10
@@ -53,23 +53,23 @@
         "dataset": "enron_lemmatized_tfidf",
         "model": "BernoulliNB",
         "metrics": {
-            "accuracy": 0.9854685646500593,
-            "weighted_precision": 0.9856494184113098,
-            "wighted_recall": 0.9854685646500593,
-            "weighted_f1": 0.9854644703602159,
-            "macro_precision": 0.9858247917555527,
-            "macro_recall": 0.9852775154034457,
-            "macro_f1": 0.9854565299193072,
-            "roc_auc": 0.9852775154034458
+            "accuracy": 0.9836867862969005,
+            "weighted_precision": 0.983853202950439,
+            "wighted_recall": 0.9836867862969005,
+            "weighted_f1": 0.9836811992304708,
+            "macro_precision": 0.9840859262393716,
+            "macro_recall": 0.9834231475617312,
+            "macro_f1": 0.98366557290405,
+            "roc_auc": 0.9834231475617312
         },
         "confusion_matrix": [
             [
-                1613,
-                41
+                3195,
+                87
             ],
             [
-                8,
-                1710
+                23,
+                3438
             ]
         ],
         "epochs": 10
@@ -78,23 +78,23 @@
         "dataset": "enron_lemmatized_tfidf",
         "model": "RandomForestClassifier",
         "metrics": {
-            "accuracy": 0.9875444839857651,
-            "weighted_precision": 0.9876244940034344,
-            "wighted_recall": 0.9875444839857651,
-            "weighted_f1": 0.9875424100738417,
-            "macro_precision": 0.9877408722109533,
-            "macro_recall": 0.9874161203728078,
-            "macro_f1": 0.987536376875519,
-            "roc_auc": 0.9874161203728078
+            "accuracy": 0.9860596173809877,
+            "weighted_precision": 0.9860901053454607,
+            "wighted_recall": 0.9860596173809877,
+            "weighted_f1": 0.9860578386665811,
+            "macro_precision": 0.9861875579461872,
+            "macro_recall": 0.9859394777815869,
+            "macro_f1": 0.9860464675994822,
+            "roc_auc": 0.9859394777815867
         },
         "confusion_matrix": [
             [
-                1622,
-                32
+                3221,
+                61
             ],
             [
-                10,
-                1708
+                33,
+                3428
             ]
         ],
         "epochs": 10
@@ -103,23 +103,23 @@
         "dataset": "enron_lemmatized_tfidf",
         "model": "DecisionTreeClassifier",
         "metrics": {
-            "accuracy": 0.9540332147093713,
-            "weighted_precision": 0.9540415001583298,
-            "wighted_recall": 0.9540332147093713,
-            "weighted_f1": 0.9540305574254482,
-            "macro_precision": 0.9540709595324042,
-            "macro_recall": 0.953965973763818,
-            "macro_f1": 0.9540116611842178,
-            "roc_auc": 0.953965973763818
+            "accuracy": 0.9529882841465224,
+            "weighted_precision": 0.9530292022378594,
+            "wighted_recall": 0.9529882841465224,
+            "weighted_f1": 0.9529800123255083,
+            "macro_precision": 0.9531281797831206,
+            "macro_recall": 0.9528093665270945,
+            "macro_f1": 0.9529399945968191,
+            "roc_auc": 0.9528093665270945
         },
         "confusion_matrix": [
             [
-                1572,
-                82
+                3105,
+                177
             ],
             [
-                73,
-                1645
+                140,
+                3321
             ]
         ],
         "epochs": 10
@@ -128,23 +128,23 @@
         "dataset": "enron_lemmatized_tfidf",
         "model": "AdaBoostClassifier",
         "metrics": {
-            "accuracy": 0.9481020166073547,
-            "weighted_precision": 0.9487728242994596,
-            "wighted_recall": 0.9481020166073547,
-            "weighted_f1": 0.9480618950841329,
-            "macro_precision": 0.9490932100628531,
-            "macro_recall": 0.9477060584774906,
-            "macro_f1": 0.9480235700470254,
-            "roc_auc": 0.9477060584774907
+            "accuracy": 0.947946018092837,
+            "weighted_precision": 0.9486326068189911,
+            "wighted_recall": 0.947946018092837,
+            "weighted_f1": 0.9478963462669231,
+            "macro_precision": 0.9490811447094349,
+            "macro_recall": 0.9473695840532469,
+            "macro_f1": 0.9478314465819698,
+            "roc_auc": 0.9473695840532468
         },
         "confusion_matrix": [
             [
-                1533,
-                121
+                3038,
+                244
             ],
             [
-                54,
-                1664
+                107,
+                3354
             ]
         ],
         "epochs": 10
@@ -153,23 +153,23 @@
         "dataset": "enron_lemmatized_tfidf",
         "model": "LogisticRegression",
         "metrics": {
-            "accuracy": 0.9836892052194544,
-            "weighted_precision": 0.9839682349305185,
-            "wighted_recall": 0.9836892052194544,
-            "weighted_f1": 0.9836830237111905,
-            "macro_precision": 0.9841860142172028,
-            "macro_recall": 0.9834524692670114,
-            "macro_f1": 0.9836733745275591,
-            "roc_auc": 0.9834524692670112
+            "accuracy": 0.9841316921251668,
+            "weighted_precision": 0.9843882726455233,
+            "wighted_recall": 0.9841316921251668,
+            "weighted_f1": 0.9841245683967006,
+            "macro_precision": 0.9846789556401043,
+            "macro_recall": 0.9838092730329654,
+            "macro_f1": 0.9841084272904289,
+            "roc_auc": 0.9838092730329654
         },
         "confusion_matrix": [
             [
-                1606,
-                48
+                3189,
+                93
             ],
             [
-                7,
-                1711
+                14,
+                3447
             ]
         ],
         "epochs": 10
@@ -178,23 +178,23 @@
         "dataset": "enron_lemmatized_tfidf",
         "model": "SGDClassifier",
         "metrics": {
-            "accuracy": 0.9854685646500593,
-            "weighted_precision": 0.9856723708434496,
-            "wighted_recall": 0.9854685646500593,
-            "weighted_f1": 0.9854641325339004,
-            "macro_precision": 0.9858587079345493,
-            "macro_recall": 0.9852662540312194,
-            "macro_f1": 0.9854560280929244,
-            "roc_auc": 0.9852662540312193
+            "accuracy": 0.9869494290375204,
+            "weighted_precision": 0.9871080509054363,
+            "wighted_recall": 0.9869494290375204,
+            "weighted_f1": 0.9869451347902458,
+            "macro_precision": 0.9873370292470245,
+            "macro_recall": 0.9866959702973905,
+            "macro_f1": 0.9869327368827919,
+            "roc_auc": 0.9866959702973906
         },
         "confusion_matrix": [
             [
-                1612,
-                42
+                3207,
+                75
             ],
             [
-                7,
-                1711
+                13,
+                3448
             ]
         ],
         "epochs": 10
@@ -203,23 +203,23 @@
         "dataset": "enron_lemmatized_tfidf",
         "model": "Perceptron",
         "metrics": {
-            "accuracy": 0.9833926453143536,
-            "weighted_precision": 0.9833976480467422,
-            "wighted_recall": 0.9833926453143536,
-            "weighted_f1": 0.9833920316063084,
-            "macro_precision": 0.9834243292861488,
-            "macro_recall": 0.9833528765063845,
-            "macro_f1": 0.98338548538716,
-            "roc_auc": 0.9833528765063845
+            "accuracy": 0.9839833901824114,
+            "weighted_precision": 0.9839922810781276,
+            "wighted_recall": 0.9839833901824114,
+            "weighted_f1": 0.9839822902089086,
+            "macro_precision": 0.9840420145260403,
+            "macro_recall": 0.9839090617291906,
+            "macro_f1": 0.9839699842553462,
+            "roc_auc": 0.9839090617291906
         },
         "confusion_matrix": [
             [
-                1623,
-                31
+                3220,
+                62
             ],
             [
-                25,
-                1693
+                46,
+                3415
             ]
         ],
         "epochs": 10
@@ -228,23 +228,23 @@
         "dataset": "enron_lemmatized_tfidf",
         "model": "PassiveAggressiveClassifier",
         "metrics": {
-            "accuracy": 0.9890272835112692,
-            "weighted_precision": 0.9890547712807544,
-            "wighted_recall": 0.9890272835112692,
-            "weighted_f1": 0.9890263170162455,
-            "macro_precision": 0.9891224334825639,
-            "macro_recall": 0.9889501304207671,
-            "macro_f1": 0.9890215588868978,
-            "roc_auc": 0.9889501304207671
+            "accuracy": 0.9890256562360967,
+            "weighted_precision": 0.9890380524485267,
+            "wighted_recall": 0.9890256562360967,
+            "weighted_f1": 0.9890247996287004,
+            "macro_precision": 0.9890996891714432,
+            "macro_recall": 0.988947004323091,
+            "macro_f1": 0.9890162811440384,
+            "roc_auc": 0.9889470043230911
         },
         "confusion_matrix": [
             [
-                1629,
-                25
+                3236,
+                46
             ],
             [
-                12,
-                1706
+                28,
+                3433
             ]
         ],
         "epochs": 10
@@ -253,23 +253,23 @@
         "dataset": "enron_lemmatized_tfidf",
         "model": "ExtraTreesClassifier",
         "metrics": {
-            "accuracy": 0.986061684460261,
-            "weighted_precision": 0.9860741300144455,
-            "wighted_recall": 0.986061684460261,
-            "weighted_f1": 0.9860608787032006,
-            "macro_precision": 0.9861183808737678,
-            "macro_recall": 0.9860059854193384,
-            "macro_f1": 0.9860551488752145,
-            "roc_auc": 0.9860059854193383
+            "accuracy": 0.9873943348657868,
+            "weighted_precision": 0.9874002964662304,
+            "wighted_recall": 0.9873943348657868,
+            "weighted_f1": 0.9873936423075764,
+            "macro_precision": 0.9874413397923623,
+            "macro_recall": 0.9873342305952583,
+            "macro_f1": 0.9873841063137578,
+            "roc_auc": 0.9873342305952583
         },
         "confusion_matrix": [
             [
-                1626,
-                28
+                3233,
+                49
             ],
             [
-                19,
-                1699
+                36,
+                3425
             ]
         ],
         "epochs": 10
@@ -278,23 +278,23 @@
         "dataset": "enron_lemmatized_tfidf",
         "model": "XGBClassifier",
         "metrics": {
-            "accuracy": 0.9765717674970344,
-            "weighted_precision": 0.9771029213600038,
-            "wighted_recall": 0.9765717674970344,
-            "weighted_f1": 0.9765575381753975,
-            "macro_precision": 0.9774011130023724,
-            "macro_recall": 0.9762423756990848,
-            "macro_f1": 0.9765415613932087,
-            "roc_auc": 0.9762423756990848
+            "accuracy": 0.9756784813881062,
+            "weighted_precision": 0.9762024063977942,
+            "wighted_recall": 0.9756784813881062,
+            "weighted_f1": 0.9756605803748305,
+            "macro_precision": 0.9766137334887335,
+            "macro_recall": 0.9752122149463482,
+            "macro_f1": 0.9756324726434593,
+            "roc_auc": 0.9752122149463482
         },
         "confusion_matrix": [
             [
-                1586,
-                68
+                3143,
+                139
             ],
             [
-                11,
-                1707
+                25,
+                3436
             ]
         ],
         "epochs": 10
@@ -303,23 +303,23 @@
         "dataset": "enron_lemmatized_tfidf",
         "model": "KNeighborsClassifier",
         "metrics": {
-            "accuracy": 0.6951364175563464,
-            "weighted_precision": 0.8078021778668888,
-            "wighted_recall": 0.6951364175563464,
-            "weighted_f1": 0.6617935119894996,
-            "macro_precision": 0.8113229828765933,
-            "macro_recall": 0.6892607331434853,
-            "macro_f1": 0.6597095803915717,
-            "roc_auc": 0.6892607331434853
+            "accuracy": 0.6944979979237728,
+            "weighted_precision": 0.8077403614422367,
+            "wighted_recall": 0.6944979979237728,
+            "weighted_f1": 0.6598122398985706,
+            "macro_precision": 0.8126699293094073,
+            "macro_recall": 0.6861827297855921,
+            "macro_f1": 0.656792419525754,
+            "roc_auc": 0.686182729785592
         },
         "confusion_matrix": [
             [
-                628,
-                1026
+                1224,
+                2058
             ],
             [
                 2,
-                1716
+                3459
             ]
         ],
         "epochs": 10
@@ -328,23 +328,48 @@
         "dataset": "enron_lemmatized_tfidf",
         "model": "BaggingClassifier",
         "metrics": {
-            "accuracy": 0.970344009489917,
-            "weighted_precision": 0.9703479650805237,
-            "wighted_recall": 0.970344009489917,
-            "weighted_f1": 0.9703429135826935,
-            "macro_precision": 0.9703690615637601,
-            "macro_recall": 0.9702995384245059,
-            "macro_f1": 0.9703312239056427,
-            "roc_auc": 0.9702995384245059
+            "accuracy": 0.9650007415097138,
+            "weighted_precision": 0.9650177099625914,
+            "wighted_recall": 0.9650007415097138,
+            "weighted_f1": 0.9649969878612679,
+            "macro_precision": 0.9650809881514479,
+            "macro_recall": 0.9648815098368677,
+            "macro_f1": 0.9649689918999428,
+            "roc_auc": 0.9648815098368677
         },
         "confusion_matrix": [
             [
-                1601,
-                53
+                3152,
+                130
             ],
             [
-                47,
-                1671
+                106,
+                3355
+            ]
+        ],
+        "epochs": 10
+    },
+    {
+        "dataset": "enron_lemmatized_tfidf",
+        "model": "VotingClassifier",
+        "metrics": {
+            "accuracy": 0.9900637698353848,
+            "weighted_precision": 0.9901331387736354,
+            "wighted_recall": 0.9900637698353848,
+            "weighted_f1": 0.9900617965749556,
+            "macro_precision": 0.9902845660900608,
+            "macro_recall": 0.9898952390359645,
+            "macro_f1": 0.9900531816086909,
+            "roc_auc": 0.9898952390359647
+        },
+        "confusion_matrix": [
+            [
+                3228,
+                54
+            ],
+            [
+                13,
+                3448
             ]
         ],
         "epochs": 10
