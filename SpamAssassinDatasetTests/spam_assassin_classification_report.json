@@ -22,7 +22,11 @@
                 364
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9827868852459016,
+            "std_accuracy": 0.003913880782397827
+        }
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
@@ -47,7 +51,11 @@
                 349
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9691803278688524,
+            "std_accuracy": 0.004386586282052336
+        }
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
@@ -72,57 +80,69 @@
                 331
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9583606557377049,
+            "std_accuracy": 0.004255985241228565
+        }
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
         "model": "RandomForestClassifier",
         "metrics": {
-            "accuracy": 0.989344262295082,
-            "weighted_precision": 0.9893648314811655,
-            "wighted_recall": 0.989344262295082,
-            "weighted_f1": 0.9893160440965535,
-            "macro_precision": 0.9900553684425393,
-            "macro_recall": 0.9848915187376726,
-            "macro_f1": 0.9874213936239313,
-            "roc_auc": 0.9848915187376726
+            "accuracy": 0.9860655737704918,
+            "weighted_precision": 0.9860972472837564,
+            "wighted_recall": 0.9860655737704918,
+            "weighted_f1": 0.9860178587047309,
+            "macro_precision": 0.9869242779078844,
+            "macro_recall": 0.9802998027613412,
+            "macro_f1": 0.9835260719372116,
+            "roc_auc": 0.9802998027613413
         },
         "confusion_matrix": [
             [
-                842,
-                3
+                841,
+                4
             ],
             [
-                10,
-                365
+                13,
+                362
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9793442622950821,
+            "std_accuracy": 0.003995428723591483
+        }
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
         "model": "DecisionTreeClassifier",
         "metrics": {
-            "accuracy": 0.9475409836065574,
-            "weighted_precision": 0.9479379801339116,
-            "wighted_recall": 0.9475409836065574,
-            "weighted_f1": 0.947693058285676,
-            "macro_precision": 0.9362762071428794,
-            "macro_recall": 0.9413648915187377,
-            "macro_f1": 0.938758670887466,
-            "roc_auc": 0.9413648915187377
+            "accuracy": 0.9450819672131148,
+            "weighted_precision": 0.9455560852811985,
+            "wighted_recall": 0.9450819672131148,
+            "weighted_f1": 0.9452605538330315,
+            "macro_precision": 0.9331763357256778,
+            "macro_recall": 0.9388481262327416,
+            "macro_f1": 0.9359343636818225,
+            "roc_auc": 0.9388481262327416
         },
         "confusion_matrix": [
             [
-                809,
-                36
+                807,
+                38
             ],
             [
-                28,
-                347
+                29,
+                346
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9408196721311475,
+            "std_accuracy": 0.006293886498509006
+        }
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
@@ -147,7 +167,11 @@
                 340
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9508196721311475,
+            "std_accuracy": 0.004519360246586942
+        }
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
@@ -172,20 +196,24 @@
                 346
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9693442622950819,
+            "std_accuracy": 0.0054518980814150225
+        }
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
         "model": "SGDClassifier",
         "metrics": {
-            "accuracy": 0.9901639344262295,
-            "weighted_precision": 0.9901594792762402,
-            "wighted_recall": 0.9901639344262295,
-            "weighted_f1": 0.9901491771055425,
-            "macro_precision": 0.9898977392143604,
-            "macro_recall": 0.9869664694280079,
-            "macro_f1": 0.988415191924819,
-            "roc_auc": 0.986966469428008
+            "accuracy": 0.990983606557377,
+            "weighted_precision": 0.9909774640052683,
+            "wighted_recall": 0.990983606557377,
+            "weighted_f1": 0.9909734898849025,
+            "macro_precision": 0.9904962974234124,
+            "macro_recall": 0.9882998027613412,
+            "macro_f1": 0.9893885445305538,
+            "roc_auc": 0.9882998027613412
         },
         "confusion_matrix": [
             [
@@ -193,11 +221,15 @@
                 4
             ],
             [
-                8,
-                367
+                7,
+                368
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9836065573770492,
+            "std_accuracy": 0.004751271064324416
+        }
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
@@ -222,32 +254,40 @@
                 369
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.978688524590164,
+            "std_accuracy": 0.004243337411654027
+        }
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
         "model": "PassiveAggressiveClassifier",
         "metrics": {
-            "accuracy": 0.9901639344262295,
-            "weighted_precision": 0.9901594792762402,
-            "wighted_recall": 0.9901639344262295,
-            "weighted_f1": 0.9901491771055425,
-            "macro_precision": 0.9898977392143604,
-            "macro_recall": 0.9869664694280079,
-            "macro_f1": 0.988415191924819,
-            "roc_auc": 0.986966469428008
+            "accuracy": 0.9877049180327869,
+            "weighted_precision": 0.9876977507883969,
+            "wighted_recall": 0.9877049180327869,
+            "weighted_f1": 0.9876817937076522,
+            "macro_precision": 0.9873608903020668,
+            "macro_recall": 0.9837080867850099,
+            "macro_f1": 0.9855081071449783,
+            "roc_auc": 0.9837080867850099
         },
         "confusion_matrix": [
             [
-                841,
-                4
+                840,
+                5
             ],
             [
-                8,
-                367
+                10,
+                365
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9826229508196722,
+            "std_accuracy": 0.004560795981391341
+        }
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
@@ -272,7 +312,11 @@
                 362
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9801639344262295,
+            "std_accuracy": 0.004318668810596568
+        }
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
@@ -297,7 +341,11 @@
                 359
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9760655737704917,
+            "std_accuracy": 0.0019672131147541144
+        }
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
@@ -322,7 +370,11 @@
                 375
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.5068852459016393,
+            "std_accuracy": 0.19909537417868262
+        }
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
@@ -347,31 +399,39 @@
                 354
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9529508196721311,
+            "std_accuracy": 0.004166644271193046
+        }
     },
     {
         "dataset": "spam_assassin_lemmatized_tfidf",
         "model": "VotingClassifier",
         "metrics": {
-            "accuracy": 0.9852459016393442,
-            "weighted_precision": 0.9852902898761989,
-            "wighted_recall": 0.9852459016393442,
-            "weighted_f1": 0.9851896061924993,
-            "macro_precision": 0.9863334134422815,
-            "macro_recall": 0.9789664694280079,
-            "macro_f1": 0.9825437201907791,
-            "roc_auc": 0.978966469428008
+            "accuracy": 0.9868852459016394,
+            "weighted_precision": 0.9869425041006588,
+            "wighted_recall": 0.9868852459016394,
+            "weighted_f1": 0.9868352055044436,
+            "macro_precision": 0.9882880717776176,
+            "macro_recall": 0.9808915187376726,
+            "macro_f1": 0.984483306836248,
+            "roc_auc": 0.9808915187376726
         },
         "confusion_matrix": [
             [
-                841,
-                4
+                842,
+                3
             ],
             [
-                14,
-                361
+                13,
+                362
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9829508196721312,
+            "std_accuracy": 0.003927589688757719
+        }
     }
 ]

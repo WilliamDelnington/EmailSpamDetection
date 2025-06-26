@@ -1,5 +1,5 @@
 import scipy.sparse
-from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV
+from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV, KFold, cross_val_score
 from sklearn.svm import SVC, LinearSVC
 from sklearn.metrics import (
     classification_report, 
@@ -830,8 +830,10 @@ class ClassificationModel2:
                     xlabel=plot_xlabel, 
                     ylabel=plot_ylabel, 
                     save_plot=save_plot)
-            self.evaluate_and_plot_proba(model)
+            self.evaluate_and_plot_proba(model, save_plot=save_plot)
             metrics = self.evaluate(model, detailed=True)
+            # k_fold_metrics = self.kfold_cross_validation(model)
+            # metrics["k_fold_scores"] = k_fold_metrics
             del model
             metric_results.append(metrics)
             print(metrics)
@@ -953,6 +955,28 @@ class ClassificationModel2:
 
         else:
             print("Model does not support probability prediction. Skipping ROC curve plotting.")
+
+    def kfold_cross_validation(self, model:BaseEstimator, n_splits=5, random_state=42):
+        """
+        Perform k-fold cross-validation on the model.
+        
+        Parameters:
+        - model: The model to be evaluated.
+        - n_splits: The number of folds for cross-validation.
+        - random_state: Controls the shuffling applied to the data before applying the split.
+        
+        Returns:
+        - A dictionary containing the mean and standard deviation of accuracy scores.
+        """
+        
+        kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+        
+        scores = cross_val_score(model, self.X, self.y, cv=kf, scoring='accuracy', n_jobs=4)
+
+        return {
+            "mean_accuracy": np.mean(scores),
+            "std_accuracy": np.std(scores)
+        }
 
 def add_to_json_array(filename, new_object, array_key=None, mode="overwrite"):
     if mode != "overwrite":

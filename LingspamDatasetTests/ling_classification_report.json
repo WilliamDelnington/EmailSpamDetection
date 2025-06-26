@@ -22,7 +22,11 @@
                 75
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9912556795218791,
+            "std_accuracy": 0.004944806457188462
+        }
     },
     {
         "dataset": "ling_lemmatized_tfidf",
@@ -47,7 +51,11 @@
                 69
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9727162504745692,
+            "std_accuracy": 0.008823117011988965
+        }
     },
     {
         "dataset": "ling_lemmatized_tfidf",
@@ -72,20 +80,24 @@
                 67
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9671249066170257,
+            "std_accuracy": 0.011819431302090783
+        }
     },
     {
         "dataset": "ling_lemmatized_tfidf",
         "model": "RandomForestClassifier",
         "metrics": {
-            "accuracy": 0.9877622377622378,
-            "weighted_precision": 0.9879325445925843,
-            "wighted_recall": 0.9877622377622378,
-            "weighted_f1": 0.9875097185442012,
-            "macro_precision": 0.9930417495029822,
-            "macro_recall": 0.9539473684210527,
-            "macro_f1": 0.9723585654620137,
-            "roc_auc": 0.9539473684210527
+            "accuracy": 0.9842657342657343,
+            "weighted_precision": 0.9845461469223845,
+            "wighted_recall": 0.9842657342657343,
+            "weighted_f1": 0.9838413334916832,
+            "macro_precision": 0.9910891089108911,
+            "macro_recall": 0.9407894736842105,
+            "macro_f1": 0.964035964035964,
+            "roc_auc": 0.9407894736842105
         },
         "confusion_matrix": [
             [
@@ -93,36 +105,44 @@
                 0
             ],
             [
-                7,
-                69
+                9,
+                67
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9790166925893722,
+            "std_accuracy": 0.006720090897629651
+        }
     },
     {
         "dataset": "ling_lemmatized_tfidf",
         "model": "DecisionTreeClassifier",
         "metrics": {
-            "accuracy": 0.9702797202797203,
-            "weighted_precision": 0.9696848804809736,
-            "wighted_recall": 0.9702797202797203,
-            "weighted_f1": 0.9696664593216316,
-            "macro_precision": 0.9518396865185698,
-            "macro_recall": 0.9160123089983021,
-            "macro_f1": 0.932870801836319,
-            "roc_auc": 0.9160123089983021
+            "accuracy": 0.9685314685314685,
+            "weighted_precision": 0.9678831129030333,
+            "wighted_recall": 0.9685314685314685,
+            "weighted_f1": 0.9679794496551298,
+            "macro_precision": 0.9451906659077973,
+            "macro_recall": 0.9150042444821731,
+            "macro_f1": 0.9293381283114175,
+            "roc_auc": 0.9150042444821732
         },
         "confusion_matrix": [
             [
-                491,
-                5
+                490,
+                6
             ],
             [
                 12,
                 64
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9548791838634221,
+            "std_accuracy": 0.004613521579600063
+        }
     },
     {
         "dataset": "ling_lemmatized_tfidf",
@@ -147,7 +167,11 @@
                 72
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9818120583444576,
+            "std_accuracy": 0.005593653514790113
+        }
     },
     {
         "dataset": "ling_lemmatized_tfidf",
@@ -172,20 +196,24 @@
                 65
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9646718430431214,
+            "std_accuracy": 0.00873915679653664
+        }
     },
     {
         "dataset": "ling_lemmatized_tfidf",
         "model": "SGDClassifier",
         "metrics": {
-            "accuracy": 0.9982517482517482,
-            "weighted_precision": 0.9982552658608996,
-            "wighted_recall": 0.9982517482517482,
-            "weighted_f1": 0.9982468396265639,
-            "macro_precision": 0.9989939637826961,
-            "macro_recall": 0.993421052631579,
-            "macro_f1": 0.9961852170491454,
-            "roc_auc": 0.993421052631579
+            "accuracy": 0.9965034965034965,
+            "weighted_precision": 0.9965175386862134,
+            "wighted_recall": 0.9965034965034965,
+            "weighted_f1": 0.9964837040893378,
+            "macro_precision": 0.9979919678714859,
+            "macro_recall": 0.986842105263158,
+            "macro_f1": 0.9923272971160295,
+            "roc_auc": 0.986842105263158
         },
         "confusion_matrix": [
             [
@@ -193,11 +221,15 @@
                 0
             ],
             [
-                1,
-                75
+                2,
+                74
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9940528823190821,
+            "std_accuracy": 0.003602254155093064
+        }
     },
     {
         "dataset": "ling_lemmatized_tfidf",
@@ -222,7 +254,11 @@
                 75
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9912562918692516,
+            "std_accuracy": 0.0019128828268973582
+        }
     },
     {
         "dataset": "ling_lemmatized_tfidf",
@@ -247,20 +283,24 @@
                 76
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9958011340673337,
+            "std_accuracy": 0.00284547459856951
+        }
     },
     {
         "dataset": "ling_lemmatized_tfidf",
         "model": "ExtraTreesClassifier",
         "metrics": {
-            "accuracy": 0.9842657342657343,
-            "weighted_precision": 0.9845461469223845,
-            "wighted_recall": 0.9842657342657343,
-            "weighted_f1": 0.9838413334916832,
-            "macro_precision": 0.9910891089108911,
-            "macro_recall": 0.9407894736842105,
-            "macro_f1": 0.964035964035964,
-            "roc_auc": 0.9407894736842105
+            "accuracy": 0.986013986013986,
+            "weighted_precision": 0.9862359862359862,
+            "wighted_recall": 0.986013986013986,
+            "weighted_f1": 0.9856814296814297,
+            "macro_precision": 0.9920634920634921,
+            "macro_recall": 0.9473684210526316,
+            "macro_f1": 0.9682222222222221,
+            "roc_auc": 0.9473684210526316
         },
         "confusion_matrix": [
             [
@@ -268,11 +308,15 @@
                 0
             ],
             [
-                9,
-                67
+                8,
+                68
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9783155548479542,
+            "std_accuracy": 0.004071301279403861
+        }
     },
     {
         "dataset": "ling_lemmatized_tfidf",
@@ -297,7 +341,11 @@
                 75
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9856612739274736,
+            "std_accuracy": 0.004335101708253805
+        }
     },
     {
         "dataset": "ling_lemmatized_tfidf",
@@ -322,7 +370,11 @@
                 75
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9863593499320296,
+            "std_accuracy": 0.004046023066533934
+        }
     },
     {
         "dataset": "ling_lemmatized_tfidf",
@@ -347,20 +399,24 @@
                 65
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9629242036422422,
+            "std_accuracy": 0.0013050839322208303
+        }
     },
     {
         "dataset": "ling_lemmatized_tfidf",
         "model": "VotingClassifier",
         "metrics": {
-            "accuracy": 0.9895104895104895,
-            "weighted_precision": 0.9896358621458223,
-            "wighted_recall": 0.9895104895104895,
-            "weighted_f1": 0.9893264832183767,
-            "macro_precision": 0.9940239043824701,
-            "macro_recall": 0.9605263157894737,
-            "macro_f1": 0.9764460427704724,
-            "roc_auc": 0.9605263157894737
+            "accuracy": 0.9912587412587412,
+            "weighted_precision": 0.9913459793699314,
+            "wighted_recall": 0.9912587412587412,
+            "weighted_f1": 0.9911319992993584,
+            "macro_precision": 0.9950099800399201,
+            "macro_recall": 0.9671052631578947,
+            "macro_f1": 0.9804856747112085,
+            "roc_auc": 0.9671052631578947
         },
         "confusion_matrix": [
             [
@@ -368,10 +424,14 @@
                 0
             ],
             [
-                6,
-                70
+                5,
+                71
             ]
         ],
-        "epochs": 10
+        "epochs": 10,
+        "k_fold_scores": {
+            "mean_accuracy": 0.9877585636780033,
+            "std_accuracy": 0.0044213195167173164
+        }
     }
 ]

@@ -40,8 +40,11 @@ MaliciousURLDatasetTests/malicious_phish_preprocessed.csv
 ImageSpamDatasetTests/data
 ImageSpamDatasetTests/model
 ImageSpamDatasetTests/SPAM IMAGE dataset
+ImageSpamDatasetTests/figs
 MaliciousURLDatasetTests/y_phishing.npy
 MaliciousURLDatasetTests/X_phishing.npy
 Multimodal/image_data
 Multimodal/text_data
 Multimodal/url_data
+Multimodal/mixed_datasets
+MixedTextDatasetTests
