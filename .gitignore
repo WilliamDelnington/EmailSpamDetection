@@ -47,4 +47,9 @@ Multimodal/image_data
 Multimodal/text_data
 Multimodal/url_data
 Multimodal/mixed_datasets
-MixedTextDatasetTests
+MixedTextDatasetTests/Ling.csv
+MixedTextDatasetTests/merged_enron.csv
+MixedTextDatasetTests/SpamAssassin.csv
+MixedTextDatasetTests/mixed_dataset.csv
+MixedTextDatasetTests/figs
+MixedTextDatasetTests/models
